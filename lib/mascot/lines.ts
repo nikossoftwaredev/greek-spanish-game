@@ -4,7 +4,7 @@ export type LolaMood = "teaching" | "happy" | "wink" | "proud" | "annoyed" | "an
 export interface LolaLine {
   /** A short Spanish exclamation, set in the serif. */
   es: string;
-  /** What she says in Greek. Left out when she is swearing: the insults are Spanish only, a free vocabulary lesson. */
+  /** The Greek translation of what she says. Always behind the «Μετάφραση» button, never shown by itself. */
   el?: string;
   /** The face she makes while saying it. */
   mood: LolaMood;
@@ -30,18 +30,18 @@ const PRAISE: LolaLine[] = [
   { es: "¡Por eso eres mi novio favorito!", el: "Γι' αυτό είσαι ο αγαπημένος μου!", mood: "proud" },
 ];
 
-/** After a wrong answer: a girlfriend at the end of her patience, in Spanish only (no Greek, no mercy). */
+/** After a wrong answer: a girlfriend at the end of her patience. In Spanish, with the Greek behind the translation button. */
 const SCOLD: LolaLine[] = [
-  { es: "¡Joder, mi amor, otra vez mal!", mood: "angry" },
-  { es: "¡Coño, qué burro eres!", mood: "angry" },
-  { es: "¿Me estás escuchando o qué?", mood: "annoyed" },
-  { es: "¡Esta noche duermes en el sofá!", mood: "angry" },
-  { es: "¡Me estás volviendo loca, hostia!", mood: "angry" },
-  { es: "¡Venga ya, cariño! ¡Eso lo vimos ayer!", mood: "annoyed" },
-  { es: "¡No me lo puedo creer! ¡Qué cabeza hueca!", mood: "angry" },
-  { es: "¡Hasta mi gato lo sabe, joder!", mood: "angry" },
-  { es: "¡Estoy muy enfadada contigo!", mood: "annoyed" },
-  { es: "¡Ay, qué vergüenza me das, mi amor!", mood: "annoyed" },
+  { es: "¡Joder, mi amor, otra vez mal!", el: "Γαμώτο, αγάπη μου, πάλι λάθος!", mood: "angry" },
+  { es: "¡Coño, qué burro eres!", el: "Ρε γαμώτο, τι γάιδαρος που είσαι!", mood: "angry" },
+  { es: "¿Me estás escuchando o qué?", el: "Με ακούς ή τι;", mood: "annoyed" },
+  { es: "¡Esta noche duermes en el sofá!", el: "Απόψε κοιμάσαι στον καναπέ!", mood: "angry" },
+  { es: "¡Me estás volviendo loca, hostia!", el: "Με τρελαίνεις, να πάρει!", mood: "angry" },
+  { es: "¡Venga ya, cariño! ¡Eso lo vimos ayer!", el: "Έλα τώρα, αγάπη μου! Αυτό το είδαμε χθες!", mood: "annoyed" },
+  { es: "¡No me lo puedo creer! ¡Qué cabeza hueca!", el: "Δεν το πιστεύω! Τι κουτό κεφάλι!", mood: "angry" },
+  { es: "¡Hasta mi gato lo sabe, joder!", el: "Ακόμα και η γάτα μου το ξέρει, γαμώτο!", mood: "angry" },
+  { es: "¡Estoy muy enfadada contigo!", el: "Είμαι πολύ θυμωμένη μαζί σου!", mood: "annoyed" },
+  { es: "¡Ay, qué vergüenza me das, mi amor!", el: "Αχ, τι ντροπή που με κάνεις, αγάπη μου!", mood: "annoyed" },
 ];
 
 /** `position` is the exercise number in the session, so the lines rotate without any randomness. */
@@ -54,7 +54,7 @@ export const lolaReaction = ({ correct, position }: { correct: boolean; position
 export const lolaVerdict = (accuracy: number): LolaLine => {
   if (accuracy >= 85) return { es: "¡Olé, mi amor! ¡Qué ronda tan perfecta! ¡Te mereces un beso!", el: "Ολέ, αγάπη μου! Τι τέλειος γύρος! Σου αξίζει ένα φιλί!", mood: "proud" };
   if (accuracy >= 60) return { es: "¡No está mal, papacito! Un poquito más y me enamoro otra vez.", el: "Όχι κακά, όμορφε! Λίγο ακόμα και ξαναερωτεύομαι.", mood: "wink" };
-  return { es: "¡Ay, qué horror, mi amor! ¡Eso no fue una ronda, fue un accidente! ¡Esta noche duermes en el sofá!", mood: "angry" };
+  return { es: "¡Ay, qué horror, mi amor! ¡Eso no fue una ronda, fue un accidente! ¡Esta noche duermes en el sofá!", el: "Αχ, τι φρίκη, αγάπη μου! Αυτό δεν ήταν γύρος, ήταν ατύχημα! Απόψε κοιμάσαι στον καναπέ!", mood: "angry" };
 };
 
 /** Little coaching remarks while a rule is on screen, rotated by the rule's number. */

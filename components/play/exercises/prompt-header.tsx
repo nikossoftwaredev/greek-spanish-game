@@ -1,5 +1,4 @@
 import { SourceBadge } from "@/components/play/source-badge";
-import { Translation } from "@/components/translation";
 import type { ExerciseSource } from "@/lib/game/types";
 
 interface PromptHeaderProps {
@@ -17,6 +16,6 @@ export const PromptHeader = ({ source, instruction, prompt, hint }: PromptHeader
     {source && <SourceBadge source={source} />}
     <h2 className="text-xs font-extrabold tracking-wider text-muted-foreground uppercase">{instruction}</h2>
     {prompt && <div className="flex flex-wrap items-center gap-3">{prompt}</div>}
-    {hint && <Translation text={hint} />}
+    {hint && <p className="text-base text-muted-foreground">{hint}</p>}
   </header>
 );
