@@ -1,5 +1,6 @@
 import type { FlatLesson } from "@/lib/content/selectors";
 import { buildSession, exampleOrder, isOrderable, type LearnerSnapshot } from "@/lib/game/builders";
+import { lessonSource } from "@/lib/game/sources";
 import type { Exercise, OrderExercise } from "@/lib/game/types";
 
 /** One screen of the step-by-step lesson. Teaching steps point into the lesson by index. */
@@ -29,7 +30,7 @@ export const buildLessonSteps = ({ entry, learner }: { entry: FlatLesson; learne
     steps.push({ kind: "rule", ruleIndex });
     const isCheckpoint = (ruleIndex + 1) % checkEvery === 0 || ruleIndex === lesson.rules.length - 1;
     const example = [...(rule.examples ?? [])].reverse().find(isOrderable);
-    if (isCheckpoint && example) steps.push({ kind: "check", exercise: exampleOrder({ example, unitId }) });
+    if (isCheckpoint && example) steps.push({ kind: "check", exercise: exampleOrder({ example, unitId, source: lessonSource({ lessonKey: entry.key }) }) });
   });
 
   (lesson.tables ?? []).forEach((_, tableIndex) => steps.push({ kind: "table", tableIndex }));

@@ -5,6 +5,7 @@ import { ArrowRight, Check, SkipForward, X } from "lucide-react";
 import { LolaFooterStage } from "@/components/mascot/lola-companion";
 import { SpeechBubble } from "@/components/mascot/speech-bubble";
 import { TappableText } from "@/components/tappable-text";
+import { Translation } from "@/components/translation";
 import { Button } from "@/components/ui/button";
 import type { Exercise, ExerciseResult } from "@/lib/game/types";
 import { cn } from "@/lib/general/utils";
@@ -54,9 +55,12 @@ export const SessionFooter = ({
         </p>
       )}
       {!result.correct && example && (
-        <p className="text-sm opacity-85">
-          Παράδειγμα: <TappableText text={example.es} context={example} className="font-es text-base" /> ({example.el})
-        </p>
+        <div className="opacity-85">
+          <p className="text-sm">
+            Παράδειγμα: <TappableText text={example.es} context={example} className="font-es text-base" />
+          </p>
+          <Translation text={example.el} className="text-sm text-inherit" />
+        </div>
       )}
       {exercise.kind === "match" && !result.correct && <p className="text-sm opacity-85">Έκανες μερικά λάθη στο ταίριασμα, θα τα ξαναδείς.</p>}
     </>
@@ -73,12 +77,12 @@ export const SessionFooter = ({
     >
       <LolaFooterStage mood={checked ? reaction.mood : "teaching"} animateKey={`${position}-${checked}`} className="flex flex-col gap-3">
         {checked && mascot && (
-          <SpeechBubble tone={result.correct ? "cheer" : "loud"} tail="left-low" className="space-y-1">
+          <SpeechBubble tone={result.correct ? "calm" : "loud"} tail="left-low" className="space-y-1">
             <p role="status" className="font-es text-xl leading-tight font-bold italic">
-              {reaction.es}
+              <TappableText text={reaction.es} />
               <span className="sr-only">{result.correct ? " Σωστά." : " Λάθος."}</span>
             </p>
-            <p className="text-sm leading-snug font-bold">{reaction.el}</p>
+            {reaction.el && <Translation text={reaction.el} className="text-sm leading-snug font-bold text-inherit" />}
             {details}
           </SpeechBubble>
         )}

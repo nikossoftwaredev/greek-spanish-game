@@ -4,11 +4,25 @@ export type Lang = "es" | "el";
 
 export type SkillArea = "vocab" | "grammar" | "verbs";
 
+/** Where an exercise comes from in the course books. Shown to the learner on the exercise. */
+export interface ExerciseSource {
+  book: "aula" | "gu";
+  /** Aula chapters or Gramática de uso units (several for a matching round). */
+  units: number[];
+  /** Printed Aula page, when the words all come from one page. */
+  page?: number;
+  /** The numbered exercise of the Gramática de uso (the 2 of "50.2"). */
+  exercise?: number;
+  /** PDF page that "open the book" goes to. */
+  pdfPage?: number;
+}
+
 interface BaseExercise {
   /** Unique within a session. */
   id: string;
   skill: SkillArea;
   unitId?: number;
+  source?: ExerciseSource;
   /** Vocabulary card this exercise reviews. */
   vocabId?: string;
   /** Grammar drill this exercise comes from: `unitId:lessonId:drillId`. */

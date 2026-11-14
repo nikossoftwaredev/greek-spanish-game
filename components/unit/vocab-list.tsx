@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, Dumbbell, Layers, LayoutList, Search, Sparkles } from "lucide-react";
+import { BookOpen, Dumbbell, Eye, Layers, LayoutList, Search, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -26,6 +26,15 @@ const MASTERY_STYLE: Record<Mastery, { dot: string; label: string }> = {
 
 type View = "pages" | "topics";
 
+/** Which language to hide so the learner can recall it: nothing, the Spanish, or the Greek. */
+type Cover = "none" | "es" | "el";
+
+const COVER_OPTIONS: { value: Cover; label: string }[] = [
+  { value: "none", label: "Όλα ορατά" },
+  { value: "es", label: "Κάλυψε τα ισπανικά" },
+  { value: "el", label: "Κάλυψε τα ελληνικά" },
+];
+
 /** Groups that come from a whole page of the book (`p16`), as opposed to a themed block of the Léxico page. */
 const isPageGroup = (group: VocabGroup): boolean => /^p\d+$/.test(group.id);
 
@@ -35,24 +44,45 @@ const matches = ({ item, query }: { item: VocabItem; query: string }): boolean =
   return stripAccents(item.es.toLowerCase()).includes(stripAccents(needle)) || stripGreekAccents(item.el).includes(stripGreekAccents(needle));
 };
 
-const WordRow = ({ item }: { item: VocabItem }) => {
+/** A covered language, shown as a button that reveals it. */
+const RevealButton = ({ label, onReveal }: { label: string; onReveal: () => void }) => (
+  <Button type="button" variant="secondary" size="sm" onClick={onReveal} icon={<Eye />}>
+    {label}
+  </Button>
+);
+
+const WordRow = ({ item, cover }: { item: VocabItem; cover: Cover }) => {
   const hydrated = useHydrated();
   const stored = useProgressStore((state) => state.cards[item.id]);
   const mastery = MASTERY_STYLE[hydrated ? masteryOf(stored) : "new"];
+  const [revealed, setRevealed] = useState(false);
+  const hideEs = cover === "es" && !revealed;
+  const hideEl = cover === "el" && !revealed;
+  const reveal = () => setRevealed(true);
 
   return (
     <li className="flex items-start gap-3 rounded-2xl border-2 border-border bg-card px-3 py-2.5">
       <span className={cn("mt-2 size-2.5 shrink-0 rounded-full", mastery.dot)} title={mastery.label} aria-label={mastery.label} />
       <div className="min-w-0 flex-1">
-        <p className="flex flex-wrap items-baseline gap-x-2">
-          <TappableText text={withArticle(item)} context={item.example} className="font-es text-xl leading-snug font-semibold" />
-        </p>
-        <p className="text-sm leading-snug font-semibold text-muted-foreground">{item.el}</p>
-        {item.noteEl && <p className="mt-1 text-xs text-muted-foreground">{item.noteEl}</p>}
+        {hideEs ? (
+          <RevealButton label="Πάτα για τα ισπανικά" onReveal={reveal} />
+        ) : (
+          <p className="flex flex-wrap items-baseline gap-x-2">
+            <TappableText text={withArticle(item)} context={item.example} className="font-es text-xl leading-snug font-semibold" />
+          </p>
+        )}
+        {hideEl ? (
+          <RevealButton label="Πάτα για τα ελληνικά" onReveal={reveal} />
+        ) : (
+          <>
+            <p className="text-sm leading-snug font-semibold text-muted-foreground">{item.el}</p>
+            {item.noteEl && !hideEs && <p className="mt-1 text-xs text-muted-foreground">{item.noteEl}</p>}
+          </>
+        )}
         {item.example && (
           <p className="mt-1.5 text-sm">
-            <TappableText text={item.example.es} context={item.example} className="font-es text-base text-foreground/90" />
-            <span className="block text-xs text-muted-foreground">{item.example.el}</span>
+            {!hideEs && <TappableText text={item.example.es} context={item.example} className="font-es text-base text-foreground/90" />}
+            {!hideEl && <span className="block text-xs text-muted-foreground">{item.example.el}</span>}
           </p>
         )}
       </div>
@@ -86,6 +116,7 @@ interface VocabListProps {
 export const VocabList = ({ groups, unitId }: VocabListProps) => {
   const [query, setQuery] = useState("");
   const [view, setView] = useState<View>("pages");
+  const [cover, setCover] = useState<Cover>("none");
 
   const back = encodeURIComponent(`/units/${unitId}`);
   const playHref = ({ mode, page }: { mode: string; page: number }): string => `/play/${mode}?units=${unitId}&pages=${page}&back=${back}`;
@@ -175,6 +206,22 @@ export const VocabList = ({ groups, unitId }: VocabListProps) => {
             </button>
           ))}
         </div>
+        <div className="flex flex-wrap rounded-2xl bg-muted p-1" role="group" aria-label="Δοκίμασε τον εαυτό σου">
+          {COVER_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              aria-pressed={cover === option.value}
+              onClick={() => setCover(option.value)}
+              className={cn(
+                "flex cursor-pointer items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-bold transition-colors",
+                cover === option.value ? "bg-card shadow-sm" : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {option.value !== "none" && <Eye className="size-4" aria-hidden />} {option.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <p className="text-sm font-bold text-muted-foreground">
@@ -237,7 +284,7 @@ export const VocabList = ({ groups, unitId }: VocabListProps) => {
               )}
               <ul className="grid gap-2 sm:grid-cols-2">
                 {group.items.map((item) => (
-                  <WordRow key={item.id} item={item} />
+                  <WordRow key={`${item.id}-${cover}`} item={item} cover={cover} />
                 ))}
               </ul>
             </div>

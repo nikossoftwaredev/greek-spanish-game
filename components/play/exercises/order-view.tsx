@@ -64,6 +64,7 @@ export const OrderView = ({ exercise, locked, result, onReady, onComplete }: Exe
   return (
     <div className="flex flex-1 flex-col gap-6">
       <PromptHeader
+        source={exercise.source}
         instruction="Φτιάξε την πρόταση στα ισπανικά"
         prompt={<span className="text-2xl leading-snug font-extrabold sm:text-3xl">{exercise.promptEl}</span>}
       />

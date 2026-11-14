@@ -1,6 +1,6 @@
 "use client";
 
-import { BookMarked, Download, Flame, GraduationCap, Layers, RotateCcw, Share2, Smile, Star, Trash2, Trophy, Upload } from "lucide-react";
+import { BookMarked, Download, Flame, GraduationCap, Languages, Layers, RotateCcw, Share2, Smile, Star, Trash2, Trophy, Upload } from "lucide-react";
 import Link from "next/link";
 import { useRef } from "react";
 import { toast } from "sonner";
@@ -58,6 +58,8 @@ export const ProgressDashboard = () => {
   const removeSavedWord = useProgressStore((state) => state.removeSavedWord);
   const mascot = useSettingsStore((state) => state.mascot);
   const setMascot = useSettingsStore((state) => state.setMascot);
+  const showTranslations = useSettingsStore((state) => state.showTranslations);
+  const setShowTranslations = useSettingsStore((state) => state.setShowTranslations);
 
   const streak = computeStreak(activeDays);
   const all = masteryForUnits({ unitIds: UNITS.map((unit) => unit.id), cards });
@@ -308,6 +310,13 @@ export const ProgressDashboard = () => {
             <Smile className="size-4" aria-hidden /> Η Λόλα μένει στην οθόνη και σχολιάζει τις απαντήσεις (και με μαλώνει)
           </Label>
           <Switch id="mascot" checked={mascot} onCheckedChange={setMascot} />
+        </div>
+
+        <div className="flex items-center justify-between gap-3">
+          <Label htmlFor="translations" className="flex items-center gap-2 font-bold">
+            <Languages className="size-4" aria-hidden /> Να φαίνονται πάντα οι μεταφράσεις (αλλιώς τις βλέπεις με κουμπί)
+          </Label>
+          <Switch id="translations" checked={showTranslations} onCheckedChange={setShowTranslations} />
         </div>
 
         <div className="flex flex-wrap gap-2 border-t-2 border-border pt-5">

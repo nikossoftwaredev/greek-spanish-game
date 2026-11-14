@@ -217,7 +217,7 @@ const AskLolaBody = () => {
         ) : (
           <Bubble mood="teaching">
             <p>
-              <span className="font-es text-xl font-semibold italic">¡Hola!</span> Ρώτα με πώς λέγεται κάτι στα ισπανικά, ή τι σημαίνει μια ισπανική φράση. Ξέρω έτοιμες φράσεις της τάξης και της καθημερινότητας.
+              <span className="font-es text-xl font-semibold italic">¡Hola, mi amor!</span> Ρώτα με πώς λέγεται κάτι στα ισπανικά, ή τι σημαίνει μια ισπανική φράση. Ξέρω έτοιμες φράσεις της τάξης και της καθημερινότητας.
             </p>
           </Bubble>
         )}

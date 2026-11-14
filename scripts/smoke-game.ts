@@ -21,6 +21,7 @@ let exercises = 0;
 
 const check = (exercise: Exercise, context: string) => {
   exercises += 1;
+  if (!exercise.source) problems.push(`${context}: the exercise does not say where it comes from`);
   if (exercise.kind === "choice") {
     if (!exercise.options.includes(exercise.answer)) problems.push(`${context}: answer missing from options (${exercise.answer})`);
     if (new Set(exercise.options).size !== exercise.options.length) problems.push(`${context}: repeated options ${JSON.stringify(exercise.options)}`);

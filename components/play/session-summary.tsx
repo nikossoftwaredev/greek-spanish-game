@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, Flame, RotateCcw, Star, Target, Trophy } from "lucide-react";
+import { BookOpen, Clock, Flame, RotateCcw, Star, Target, Trophy } from "lucide-react";
 import Link from "next/link";
 
 import { LolaVerdict } from "@/components/mascot/lola-verdict";
@@ -30,6 +30,8 @@ interface SessionSummaryProps {
   seconds: number;
   exitHref: string;
   exitLabel: string;
+  /** Which chapters of each book the session drew from, one line per book. */
+  sources?: string[];
   onAgain: () => void;
 }
 
@@ -41,7 +43,7 @@ const Stat = ({ icon, label, value }: { icon: React.ReactNode; label: string; va
   </div>
 );
 
-export const SessionSummary = ({ title, xpGained, correct, wrong, seconds, exitHref, exitLabel, onAgain }: SessionSummaryProps) => {
+export const SessionSummary = ({ title, xpGained, correct, wrong, seconds, exitHref, exitLabel, sources = [], onAgain }: SessionSummaryProps) => {
   const dailyGoal = useProgressStore((state) => state.dailyGoal);
   const xpToday = useProgressStore((state) => state.xpByDay[todayKey()] ?? 0);
   const activeDays = useProgressStore((state) => state.activeDays);
@@ -97,6 +99,19 @@ export const SessionSummary = ({ title, xpGained, correct, wrong, seconds, exitH
         <Stat icon={<Target className="size-5 text-success" />} label="Ακρίβεια" value={`${accuracy}%`} />
         <Stat icon={<Clock className="size-5" />} label="Χρόνος" value={`${minutes}:${rest}`} />
       </div>
+
+      {sources.length > 0 && (
+        <div className="w-full space-y-1 rounded-2xl border-2 border-border bg-card p-4 text-left shadow-[0_3px_0_0_var(--border)]">
+          <p className="flex items-center gap-1.5 text-xs font-extrabold tracking-wide text-muted-foreground uppercase">
+            <BookOpen className="size-3.5" aria-hidden /> Από πού ήταν αυτός ο γύρος
+          </p>
+          {sources.map((line) => (
+            <p key={line} className="text-sm font-bold">
+              {line}
+            </p>
+          ))}
+        </div>
+      )}
 
       <div className="w-full space-y-2 rounded-2xl border-2 border-border bg-card p-4 text-left shadow-[0_3px_0_0_var(--border)]">
         <div className="flex items-center justify-between text-sm font-bold">

@@ -53,7 +53,7 @@ export const LolaCorner = () => {
       <div key={pathname} className="mt-2 max-w-48 motion-reduce:hidden motion-safe:animate-bubble-life">
         <SpeechBubble tone={greeting.mood === "annoyed" ? "loud" : "calm"} tail="right" className="px-3 py-2">
           <p className="font-es text-lg leading-tight font-bold italic">{greeting.es}</p>
-          <p className="text-xs leading-snug font-bold">{greeting.el}</p>
+          {greeting.el && <p className="text-xs leading-snug font-bold">{greeting.el}</p>}
         </SpeechBubble>
       </div>
       <AskLola body="full" mood={greeting.mood} badge className="h-32 w-auto md:h-44" />

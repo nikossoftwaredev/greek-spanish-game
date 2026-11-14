@@ -7,6 +7,7 @@ import { useCallback, useRef, useState } from "react";
 import { CONFIRM_DIALOG } from "@/components/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { buildSession } from "@/lib/game/builders";
+import { summarizeSources } from "@/lib/game/sources";
 import type { Exercise, ExerciseResult, SessionConfig } from "@/lib/game/types";
 import { finishExercise } from "@/lib/homework/finish-exercise";
 import type { CardRating } from "@/lib/srs/fsrs";
@@ -160,6 +161,7 @@ const SessionRound = ({ config, title, exitHref, exitLabel, onAgain }: SessionRo
         seconds={seconds}
         exitHref={exitHref}
         exitLabel={exitLabel}
+        sources={summarizeSources(queue.map((item) => item.exercise.source))}
         onAgain={onAgain}
       />
     );

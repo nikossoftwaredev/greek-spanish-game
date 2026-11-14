@@ -278,6 +278,7 @@ html body[data-scroll-locked] {
   --lola-jacket: #1fa3ad;
   --lola-jacket-shade: #157a85;
   --lola-line: #0f1330;
+  --lola-bubble: #fff8ec;
   --lola-lips: #c2455a;
   --lola-lip-shine: #ff9fae;
   --lola-mouth: #4a1220;
@@ -292,4 +293,14 @@ html body[data-scroll-locked] {
   --lola-pants-shade: #1f2c55;
   --lola-shoe: #fff8ec;
   --lola-sole: #d9cdb8;
+}
+
+/* Lola's speech bubbles are cream with dark ink in light and dark mode alike, so what sits inside uses the light theme colours. */
+@utility lola-bubble {
+  background-color: var(--lola-bubble);
+  color: var(--lola-line);
+  --foreground: oklch(0.25 0.035 45);
+  --muted: oklch(0.945 0.022 84);
+  --muted-foreground: oklch(0.5 0.035 50);
+  --border: oklch(0.88 0.028 78);
 }

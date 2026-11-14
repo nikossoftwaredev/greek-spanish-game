@@ -2,7 +2,7 @@
 
 import { memo, useMemo } from "react";
 
-import { tokenize } from "@/lib/game/text";
+import { tokenizeGlued } from "@/lib/game/text";
 import { cn } from "@/lib/general/utils";
 import { useDialogStore } from "@/lib/stores/dialog-store";
 import type { ExampleSentence } from "@/types/content";
@@ -20,27 +20,30 @@ interface TappableTextProps {
 /** Spanish text where tapping any word shows its dictionary form, meaning and an example. */
 const TappableTextBase = ({ text, context, className }: TappableTextProps) => {
   const openDialog = useDialogStore((state) => state.openDialog);
-  const tokens = useMemo(() => tokenize(text), [text]);
+  const pieces = useMemo(() => tokenizeGlued(text), [text]);
 
   return (
     <span className={className}>
-      {tokens.map((token, index) => {
-        if (!token.word) return <span key={index}>{token.text}</span>;
+      {pieces.map((piece, index) => {
+        if (piece.kind === "text") return <span key={index}>{piece.text}</span>;
         return (
-          <button
-            key={index}
-            type="button"
-            onClick={(event) => {
-              event.stopPropagation();
-              openDialog(WORD_LOOKUP_DIALOG, { word: token.text, context: context ?? { es: text, el: "" } });
-            }}
-            className={cn(
-              "cursor-pointer rounded-sm underline decoration-primary/35 decoration-dotted decoration-2 underline-offset-[5px]",
-              "transition-colors hover:bg-primary/10 hover:decoration-primary focus-visible:bg-primary/10 focus-visible:outline-2 focus-visible:outline-primary",
-            )}
-          >
-            {token.text}
-          </button>
+          <span key={index} className="whitespace-nowrap">
+            {piece.before}
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                openDialog(WORD_LOOKUP_DIALOG, { word: piece.text, context: context ?? { es: text, el: "" } });
+              }}
+              className={cn(
+                "cursor-pointer rounded-sm underline decoration-primary/35 decoration-dotted decoration-2 underline-offset-[5px]",
+                "transition-colors hover:bg-primary/10 hover:decoration-primary focus-visible:bg-primary/10 focus-visible:outline-2 focus-visible:outline-primary",
+              )}
+            >
+              {piece.text}
+            </button>
+            {piece.after}
+          </span>
         );
       })}
     </span>

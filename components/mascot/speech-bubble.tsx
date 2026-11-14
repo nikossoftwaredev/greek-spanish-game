@@ -1,16 +1,15 @@
 import { cn } from "@/lib/general/utils";
 
-type Tone = "calm" | "cheer" | "loud";
+type Tone = "calm" | "loud";
 type Tail = "left" | "left-low" | "right" | "down" | "down-left";
 
-/** `loud` is for when she shouts: red, white text, and it shakes. */
+/** `calm` is cream with dark ink; `loud` is for when she shouts: red, white text, and it shakes. */
 const TONES: Record<Tone, string> = {
-  calm: "bg-card text-foreground motion-safe:animate-pop",
-  cheer: "bg-sun text-foreground motion-safe:animate-pop",
+  calm: "lola-bubble motion-safe:animate-pop",
   loud: "bg-destructive text-white motion-safe:animate-shake",
 };
 
-const TAIL_FILL: Record<Tone, string> = { calm: "bg-card", cheer: "bg-sun", loud: "bg-destructive" };
+const TAIL_FILL: Record<Tone, string> = { calm: "bg-(--lola-bubble)", loud: "bg-destructive" };
 
 /** A rotated square half hidden in the bubble's edge: its two outer borders make the pointer. */
 const TAILS: Record<Tail, string> = {

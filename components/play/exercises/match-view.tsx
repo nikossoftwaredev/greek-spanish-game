@@ -87,7 +87,7 @@ export const MatchView = ({ exercise, onComplete, onReady }: ExerciseViewProps<M
 
   return (
     <div className="flex flex-1 flex-col gap-5">
-      <PromptHeader instruction="Αντιστοίχισε κάθε λέξη με τη σημασία της" />
+      <PromptHeader source={exercise.source} instruction="Αντιστοίχισε κάθε λέξη με τη σημασία της" />
       <div className="grid grid-cols-2 gap-x-3 gap-y-0">
         <div className="space-y-2.5">
           {exercise.pairs.map((pair) => renderCard({ side: "es", id: pair.id, text: pair.es }))}

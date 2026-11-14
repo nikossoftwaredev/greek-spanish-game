@@ -10,21 +10,25 @@ import { TappableText } from "@/components/tappable-text";
 import { Button } from "@/components/ui/button";
 import { type FlatVocab, withArticle } from "@/lib/content/selectors";
 import { buildFlashcards, buildSavedFlashcards } from "@/lib/game/builders";
+import { summarizeSources, vocabSource } from "@/lib/game/sources";
 import type { SessionConfig } from "@/lib/game/types";
 import { cn } from "@/lib/general/utils";
 import { type CardRating, previewIntervals } from "@/lib/srs/fsrs";
 import { useDialogStore } from "@/lib/stores/dialog-store";
 import { useProgressStore } from "@/lib/stores/progress-store";
+import { useSettingsStore } from "@/lib/stores/settings-store";
 
 import { SessionSummary } from "./session-summary";
+import { SourceBadge } from "./source-badge";
 
-const XP_PER_CARD: Record<CardRating, number> = { again: 2, hard: 5, good: 8, easy: 10 };
+/** Two buttons are enough: you knew it or you did not. */
+type Rating = Extract<CardRating, "again" | "good">;
 
-const RATINGS: { value: CardRating; label: string; variant: "danger" | "chunky-outline" | "success" | "chunky"; key: string }[] = [
-  { value: "again", label: "Ξανά", variant: "danger", key: "1" },
-  { value: "hard", label: "Δύσκολο", variant: "chunky-outline", key: "2" },
-  { value: "good", label: "Καλά", variant: "success", key: "3" },
-  { value: "easy", label: "Εύκολο", variant: "chunky", key: "4" },
+const XP_PER_CARD: Record<Rating, number> = { again: 2, good: 8 };
+
+const RATINGS: { value: Rating; label: string; variant: "danger" | "success"; key: string }[] = [
+  { value: "again", label: "Δεν το ήξερα", variant: "danger", key: "1" },
+  { value: "good", label: "Το ήξερα", variant: "success", key: "2" },
 ];
 
 const formatInterval = (days: number): string => {
@@ -35,7 +39,6 @@ const formatInterval = (days: number): string => {
   return `${months} ${months === 1 ? "μήνας" : "μήνες"}`;
 };
 
-type Direction = "es-el" | "el-es";
 
 interface FlashcardSessionProps {
   config: SessionConfig;
@@ -62,7 +65,8 @@ const FlashcardRound = ({ config, title, exitHref, exitLabel, onAgain }: Flashca
   const [deck] = useState<FlatVocab[]>(() => startDeck(config));
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
-  const [direction, setDirection] = useState<Direction>("es-el");
+  const direction = useSettingsStore((state) => state.cardDirection);
+  const setDirection = useSettingsStore((state) => state.setCardDirection);
   const [xp, setXp] = useState(0);
   const [again, setAgain] = useState(0);
   const [finished, setFinished] = useState(false);
@@ -70,13 +74,14 @@ const FlashcardRound = ({ config, title, exitHref, exitLabel, onAgain }: Flashca
   const [startedAt] = useState(() => Date.now());
 
   const card = deck[index];
+  const source = card ? vocabSource(card) : undefined;
   const total = deck.length;
   const progress = (index / total) * 100;
   const previews = card && flipped ? previewIntervals({ stored: useProgressStore.getState().cards[card.id] }) : null;
 
   const handleFlip = () => setFlipped((value) => !value);
 
-  const handleRate = (rating: CardRating) => {
+  const handleRate = (rating: Rating) => {
     if (!card) return;
     const store = useProgressStore.getState();
     store.rateCard({ id: card.id, rating });
@@ -128,6 +133,7 @@ const FlashcardRound = ({ config, title, exitHref, exitLabel, onAgain }: Flashca
         seconds={seconds}
         exitHref={exitHref}
         exitLabel={exitLabel}
+        sources={summarizeSources(deck.map(vocabSource))}
         onAgain={onAgain}
       />
     );
@@ -162,27 +168,33 @@ const FlashcardRound = ({ config, title, exitHref, exitLabel, onAgain }: Flashca
         </span>
         <Button
           type="button"
-          variant="ghost"
-          size="icon"
+          variant="secondary"
+          size="sm"
           aria-label="Αλλαγή κατεύθυνσης: ισπανικά ή ελληνικά πρώτα"
-          title={frontIsSpanish ? "Τώρα: ισπανικά → ελληνικά" : "Τώρα: ελληνικά → ισπανικά"}
+          title={frontIsSpanish ? "Τώρα: ισπανικά → ελληνικά. Πάτα για ελληνικά → ισπανικά." : "Τώρα: ελληνικά → ισπανικά. Πάτα για ισπανικά → ελληνικά."}
           onClick={() => {
             setDirection(frontIsSpanish ? "el-es" : "es-el");
             setFlipped(false);
           }}
+          icon={<ArrowLeftRight />}
         >
-          <ArrowLeftRight />
+          {frontIsSpanish ? "ES → ΕΛ" : "ΕΛ → ES"}
         </Button>
       </header>
 
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center gap-6 px-4 pt-6 pb-56">
         {card && (
           <>
-            <p className="flex items-center gap-1.5 text-xs font-extrabold tracking-wider text-muted-foreground uppercase">
-              <Layers className="size-3.5" aria-hidden /> {card.groupTitleEl}
-              {card.unitId >= 0 && ` · Κεφάλαιο ${card.unitId}`}
-              {card.page !== undefined && ` · Σελίδα ${card.page}`}
-            </p>
+            <div className="space-y-1.5 text-center">
+              {source && (
+                <div className="flex justify-center">
+                  <SourceBadge source={source} />
+                </div>
+              )}
+              <p className="flex items-center justify-center gap-1.5 text-xs font-extrabold tracking-wider text-muted-foreground uppercase">
+                <Layers className="size-3.5" aria-hidden /> {card.groupTitleEl}
+              </p>
+            </div>
 
             <div
               key={card.id}
@@ -202,6 +214,7 @@ const FlashcardRound = ({ config, title, exitHref, exitLabel, onAgain }: Flashca
                 )}
               >
                 <div className="col-start-1 row-start-1 flex flex-col items-center justify-center gap-4 rounded-[2rem] border-2 border-border bg-card p-6 text-center shadow-[0_6px_0_0_var(--border)] [backface-visibility:hidden]">
+                  <p className="text-xs font-extrabold tracking-wide text-muted-foreground uppercase">{frontIsSpanish ? "Τι σημαίνει;" : "Πώς λέγεται στα ισπανικά;"}</p>
                   {frontIsSpanish && <p className="font-es text-4xl leading-tight font-semibold sm:text-5xl">{withArticle(card)}</p>}
                   {!frontIsSpanish && <p className="text-3xl leading-tight font-extrabold">{card.el}</p>}
                   <p className="text-sm text-muted-foreground">Πάτησε για να γυρίσει η κάρτα</p>
@@ -235,8 +248,8 @@ const FlashcardRound = ({ config, title, exitHref, exitLabel, onAgain }: Flashca
           )}
           {flipped && (
             <div className="space-y-2">
-              <p className="text-center text-xs font-bold text-muted-foreground">Πόσο εύκολα το θυμήθηκες;</p>
-              <div className="grid grid-cols-4 gap-2">
+              <p className="text-center text-xs font-bold text-muted-foreground">Το ήξερες;</p>
+              <div className="grid grid-cols-2 gap-2">
                 {RATINGS.map((rating) => (
                   <Button
                     key={rating.value}

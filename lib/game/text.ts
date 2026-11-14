@@ -114,3 +114,39 @@ export const tokenize = (text: string): TextToken[] => {
   if (last < text.length) tokens.push({ text: text.slice(last), word: false });
   return tokens;
 };
+
+export type GluedPiece = { kind: "text"; text: string } | { kind: "word"; text: string; before: string; after: string };
+
+/**
+ * Like `tokenize`, but the punctuation that touches a word travels with it ("¡Hola!" is one unit),
+ * so a line never breaks between a word and its "!" or "?".
+ */
+export const tokenizeGlued = (text: string): GluedPiece[] => {
+  const tokens = tokenize(text).map((token) => ({ ...token }));
+  const attached = new Map<number, { before: string; after: string }>();
+
+  tokens.forEach((token, index) => {
+    if (!token.word) return;
+    let before = "";
+    let after = "";
+    const previous = tokens[index - 1];
+    const next = tokens[index + 1];
+    if (previous && !previous.word) {
+      before = previous.text.match(/\S+$/)?.[0] ?? "";
+      previous.text = previous.text.slice(0, previous.text.length - before.length);
+    }
+    if (next && !next.word) {
+      after = next.text.match(/^\S+/)?.[0] ?? "";
+      next.text = next.text.slice(after.length);
+    }
+    attached.set(index, { before, after });
+  });
+
+  const pieces: GluedPiece[] = [];
+  tokens.forEach((token, index) => {
+    const around = attached.get(index);
+    if (token.word && around) pieces.push({ kind: "word", text: token.text, ...around });
+    else if (token.text) pieces.push({ kind: "text", text: token.text });
+  });
+  return pieces;
+};

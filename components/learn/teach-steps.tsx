@@ -1,9 +1,14 @@
-import { Lightbulb } from "lucide-react";
+"use client";
+
+import { Languages, Lightbulb } from "lucide-react";
+import { useState } from "react";
 
 import { GrammarTable } from "@/components/grammar/grammar-table";
 import { SpeechBubble } from "@/components/mascot/speech-bubble";
 import { TappableText } from "@/components/tappable-text";
+import { Button } from "@/components/ui/button";
 import { lolaNudge } from "@/lib/mascot/lines";
+import { useSettingsStore } from "@/lib/stores/settings-store";
 import type { GrammarLesson, GrammarRule, GrammarTable as GrammarTableData } from "@/types/content";
 
 /** What Lola says: a speech bubble. She is standing on the footer below. */
@@ -36,34 +41,47 @@ interface RuleStepProps {
   total: number;
 }
 
-/** One rule: the explanation first, then the examples arrive one by one, each with its sound. */
-export const RuleStep = ({ rule, ruleIndex, total }: RuleStepProps) => (
-  <div className="space-y-6">
-    <p className="text-xs font-extrabold tracking-wide text-muted-foreground uppercase">
-      Κανόνας {ruleIndex + 1} από {total}
-    </p>
-    <p className="text-xl leading-relaxed font-bold">{rule.textEl}</p>
+/** One rule: the explanation first, then the examples arrive one by one. Translations wait for a button. */
+export const RuleStep = ({ rule, ruleIndex, total }: RuleStepProps) => {
+  const always = useSettingsStore((state) => state.showTranslations);
+  const [asked, setAsked] = useState(false);
+  const showTranslations = always || asked;
 
-    {rule.examples && rule.examples.length > 0 && (
-      <ul className="space-y-3" aria-label="Παραδείγματα">
-        {rule.examples.map((example, index) => (
-          <li
-            key={example.es}
-            className="flex items-start gap-2 rounded-2xl border-2 border-border bg-card px-4 py-3 shadow-[0_3px_0_0_var(--border)] motion-safe:animate-rise"
-            style={{ animationDelay: `${150 + index * 160}ms` }}
-          >
-            <div className="min-w-0 flex-1">
-              <TappableText text={example.es} context={example} className="font-es text-2xl leading-snug font-semibold" />
-              <span className="mt-0.5 block text-sm text-muted-foreground">{example.el}</span>
-            </div>
-          </li>
-        ))}
-      </ul>
-    )}
+  return (
+    <div className="space-y-6">
+      <p className="text-xs font-extrabold tracking-wide text-muted-foreground uppercase">
+        Κανόνας {ruleIndex + 1} από {total}
+      </p>
+      <p className="text-xl leading-relaxed font-bold">{rule.textEl}</p>
 
-    <Say>{lolaNudge(ruleIndex)}</Say>
-  </div>
-);
+      {rule.examples && rule.examples.length > 0 && (
+        <div className="space-y-3">
+          <ul className="space-y-3" aria-label="Παραδείγματα">
+            {rule.examples.map((example, index) => (
+              <li
+                key={example.es}
+                className="flex items-start gap-2 rounded-2xl border-2 border-border bg-card px-4 py-3 shadow-[0_3px_0_0_var(--border)] motion-safe:animate-rise"
+                style={{ animationDelay: `${150 + index * 160}ms` }}
+              >
+                <div className="min-w-0 flex-1">
+                  <TappableText text={example.es} context={example} className="font-es text-2xl leading-snug font-semibold" />
+                  {showTranslations && <span className="mt-0.5 block text-sm text-muted-foreground">{example.el}</span>}
+                </div>
+              </li>
+            ))}
+          </ul>
+          {!showTranslations && (
+            <Button type="button" variant="chunky-outline" size="sm" onClick={() => setAsked(true)} icon={<Languages />}>
+              Μετάφραση
+            </Button>
+          )}
+        </div>
+      )}
+
+      <Say>{lolaNudge(ruleIndex)}</Say>
+    </div>
+  );
+};
 
 export const TableStep = ({ table }: { table: GrammarTableData }) => (
   <div className="space-y-5">

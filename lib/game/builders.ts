@@ -1,8 +1,10 @@
 import { EVERY_LESSON, type FlatLesson, type FlatVocab, lessonByKey, lessonsForUnits, verbsForUnits, vocabForUnits, withArticle } from "@/lib/content/selectors";
+import { lessonSource, matchSource, verbSource, vocabSource } from "@/lib/game/sources";
 import { acceptedForms, sample, shuffle } from "@/lib/game/text";
 import type {
   ChoiceExercise,
   Exercise,
+  ExerciseSource,
   MatchExercise,
   OrderExercise,
   SessionConfig,
@@ -67,6 +69,7 @@ const choiceBase = (item: FlatVocab) => ({
   skill: "vocab" as const,
   unitId: item.unitId,
   vocabId: item.id,
+  source: vocabSource(item),
 });
 
 const esToElChoice = ({ item, pool }: { item: FlatVocab; pool: FlatVocab[] }): ChoiceExercise => ({
@@ -111,13 +114,14 @@ const matchRound = ({ items }: { items: FlatVocab[] }): MatchExercise => ({
   id: nextId("match"),
   skill: "vocab",
   kind: "match",
+  source: matchSource(items),
   pairs: shuffle(items).map((item) => ({ id: item.id, es: withArticle(item), el: item.el, vocabId: item.id })),
   elOrder: shuffle(items.map((item) => item.id)),
 });
 
 const drillToExercise = ({ drill, lessonKey, unitId }: { drill: Drill; lessonKey: string; unitId?: number }): Exercise => {
   const drillKey = `${lessonKey}:${drill.id}`;
-  const base = { skill: "grammar" as const, unitId, drillKey };
+  const base = { skill: "grammar" as const, unitId, drillKey, source: lessonSource({ lessonKey, exercise: drill.exercise }) };
 
   if (drill.type === "choice")
     return {
@@ -171,9 +175,9 @@ export const isOrderable = (example: ExampleSentence): boolean => {
 };
 
 /** Rebuild a rule's example sentence from its Greek translation (the check after each rule of a lesson). */
-export const exampleOrder = ({ example, unitId }: { example: ExampleSentence; unitId?: number }): OrderExercise => {
+export const exampleOrder = ({ example, unitId, source }: { example: ExampleSentence; unitId?: number; source?: ExerciseSource }): OrderExercise => {
   const solution = example.es.trim().split(/\s+/);
-  return { id: nextId("example"), skill: "grammar", unitId, kind: "order", promptEl: example.el, tiles: shuffle(solution), solution };
+  return { id: nextId("example"), skill: "grammar", unitId, source, kind: "order", promptEl: example.el, tiles: shuffle(solution), solution };
 };
 
 const conjugationExercise = ({ verb, person }: { verb: Verb; person: number }): TypeExercise => {
@@ -184,6 +188,7 @@ const conjugationExercise = ({ verb, person }: { verb: Verb; person: number }): 
     skill: "verbs",
     kind: "type",
     verbId: verb.id,
+    source: verbSource(verb.id),
     instructionEl: `Κλίνε το ρήμα «${verb.infinitive}» (${verb.el}) στον ενεστώτα`,
     promptText: "",
     promptLang: "es",

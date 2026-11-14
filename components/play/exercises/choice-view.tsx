@@ -33,6 +33,7 @@ export const ChoiceView = ({ exercise, locked, result, onComplete }: ExerciseVie
   return (
     <div className="flex flex-1 flex-col gap-6">
       <PromptHeader
+        source={exercise.source}
         instruction={exercise.instructionEl}
         hint={exercise.promptHintEl}
         prompt={
