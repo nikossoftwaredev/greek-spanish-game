@@ -18,18 +18,16 @@ paths:
 
 | Component | Use for |
 | --- | --- |
-| `CircleIcon` (`components/CircleIcon.tsx`) | Any prominent icon display: feature cards, services, about, highlights. Raw Lucide icons are only for small inline UI (button icons, form labels, nav items). |
-| `SocialIcon` (`components/social-icon.tsx`) | ALL social media links (footer, contact, navbar). Platform colors and hover effects included. Never build a custom social button. |
-| `ExpandMap` (`components/expand-map.tsx`) | ALL map displays. Props: `address`, `mapsUrl`, `coordinates`. Never embed a raw Google Maps iframe. |
-| `EmptyState` | Icon + title + optional description (empty tables, lists). |
-| `PageHeader` | Title + optional description + children slot for action buttons. |
-| `UserAvatar` | Image with initials fallback, size variants (sm/md/lg). |
-| `PaginationControls` | Prev/next with page count, auto-hides when `totalPages <= 1`. |
+| `TappableText` (`components/tappable-text.tsx`) | Any Spanish text the learner may want to look up. Opens the word panel through the dialog store. |
+| `ProgressRing` (`components/progress-ring.tsx`) | Circular progress meters. |
+| `Lola` (`components/mascot/lola.tsx`) | The mascot: `<Lola mood="happy" />`. Moods `teaching`, `happy`, `proud`, `angry`. |
+| `ConjugationTable` (`components/verbs/conjugation-table.tsx`) | The present tense of one verb with irregular forms highlighted. |
 
 Extract a new shared component once 3+ duplications exist, into `components/`, not `components/ui/`.
 
 ## Button
 
+- Use the shadcn `Button` with **variants and sizes only**. Game controls use the `chunky`, `chunky-outline`, `success` and `danger` variants (solid lower edge, 3 px press) and the `xl` size.
 - Use the shadcn `Button` with **variants and sizes only**. Never add Tailwind classes that duplicate a variant. `className` is for layout (`w-full`, `flex-1`) or conditional state (`isOpen && "border-primary"`).
 - Built-in props: `loading={true}` renders a `<Loader2>` spinner and auto-disables; `icon={<Plus />}` renders before children and is hidden while loading; `variant="brand"` uses the `--brand-primary` CSS variable.
 - Pattern: `<Button loading={isPending} icon={<Save className="size-4" />}>Save</Button>`
@@ -42,8 +40,7 @@ Extract a new shared component once 3+ duplications exist, into `components/`, n
 
 ## Typography
 
-- Admin and app pages: use the components in `@/components/ui/typography.tsx`.
-- Landing page sections: raw `<h2>`/`<p>` with Tailwind is fine, since it gives more design flexibility.
+- Headings use the serif (`font-es`) for the editorial feel, body text the sans. Raw `<h1>`/`<p>` with Tailwind is fine in this app.
 
 ## ScrollArea (shadcn), preferred over native overflow
 
@@ -67,7 +64,7 @@ Radix's Viewport uses `display: table` internally, which breaks height calculati
 
 ## Styling
 
-- CSS variables live in `app/[locale]/globals.css` (including brand colors like `--forest`, `--leaf`, `--cream`). Dark mode via `next-themes`, class strategy, `@custom-variant dark (&:is(.dark *))`.
+- CSS variables live in `app/globals.css` (including brand colors like `--forest`, `--leaf`, `--cream`). Dark mode via `next-themes`, class strategy, `@custom-variant dark (&:is(.dark *))`.
 - **Semantic tokens only:** `text-foreground`, `bg-background`. Never raw color values. New brand colors become CSS variables with semantic names, referenced as `bg-forest` or `text-leaf`.
 - **Tailwind 4 canonical class names:** `z-100` not `z-[100]`, `bg-linear-to-t` not `bg-gradient-to-t`.
 - **Transitions use `transition-all duration-300` or `transition-colors`** on interactive elements, so nothing changes state abruptly. Animate `transform` and `opacity` only, never width/height/top/left.

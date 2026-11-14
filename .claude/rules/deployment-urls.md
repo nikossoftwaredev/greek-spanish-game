@@ -1,5 +1,7 @@
 # Deployment URLs & Public Origin
 
+> This study app is static and noindex (`robots: { index: false }` in `app/layout.tsx`), so it currently has **no absolute-URL surface** (no sitemap, canonical link or OG image) and `NEXT_PUBLIC_SITE_URL` can stay unset: `pnpm build` needs no environment variables. `lib/general/site-url.ts` is kept on purpose: the moment anything needs an absolute URL, import `SITE_URL` from it and the rules below apply in full.
+
 <!-- No `paths` frontmatter on purpose: this rule loads every session. The mistake it
      prevents happens in conversation ("let's deploy"), not while reading a file. -->
 

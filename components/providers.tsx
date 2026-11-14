@@ -1,36 +1,25 @@
 "use client";
 
-import { SessionProvider } from "next-auth/react";
-import { AbstractIntlMessages,NextIntlClientProvider } from "next-intl";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
+import { useEffect } from "react";
 
 import { DialogProvider } from "@/components/dialog-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { rehydrateStores } from "@/hooks/use-hydrated";
+import { usePdfStore } from "@/lib/stores/pdf-store";
 
-type Props = {
-  children: React.ReactNode;
-  messages: AbstractIntlMessages;
-  locale: string;
-};
+export const Providers = ({ children }: { children: React.ReactNode }) => {
+  useEffect(() => {
+    rehydrateStores();
+    usePdfStore.getState().refresh();
+  }, []);
 
-export const Providers = ({ children, messages, locale }: Props) => {
   return (
-    <SessionProvider>
-      <NextThemesProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-      >
-        <NextIntlClientProvider messages={messages} locale={locale}>
-          <TooltipProvider>
-            {children}
-          </TooltipProvider>
-          <DialogProvider />
-          <Toaster />
-        </NextIntlClientProvider>
-      </NextThemesProvider>
-    </SessionProvider>
+    <NextThemesProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+      <TooltipProvider>{children}</TooltipProvider>
+      <DialogProvider />
+      <Toaster />
+    </NextThemesProvider>
   );
 };

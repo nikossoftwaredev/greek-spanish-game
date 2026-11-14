@@ -1,0 +1,272 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-manrope);
+  --font-display: var(--font-alegreya);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-primary-edge: var(--primary-edge);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-success: var(--success);
+  --color-success-edge: var(--success-edge);
+  --color-success-soft: var(--success-soft);
+  --color-danger-soft: var(--danger-soft);
+  --color-sun: var(--sun);
+  --color-sun-edge: var(--sun-edge);
+  --color-sky: var(--sky);
+  --color-edge: var(--edge);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+
+  --animate-shake: shake 0.42s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  --animate-pop: pop 0.34s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-rise: rise 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-float-up: float-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-sway: sway 3.6s ease-in-out infinite;
+
+  @keyframes sway {
+    0%,
+    100% {
+      transform: translateY(0) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-3px) rotate(-1.2deg);
+    }
+  }
+
+  @keyframes shake {
+    10%,
+    90% {
+      transform: translateX(-2px);
+    }
+    20%,
+    80% {
+      transform: translateX(4px);
+    }
+    30%,
+    50%,
+    70% {
+      transform: translateX(-7px);
+    }
+    40%,
+    60% {
+      transform: translateX(7px);
+    }
+  }
+
+  @keyframes pop {
+    0% {
+      transform: scale(0.86);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes rise {
+    0% {
+      transform: translateY(14px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes float-up {
+    0% {
+      transform: translateY(8px);
+      opacity: 0;
+    }
+    25% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-34px);
+      opacity: 0;
+    }
+  }
+
+  @keyframes confetti {
+    0% {
+      transform: translateY(-6vh) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(105vh) rotate(540deg);
+      opacity: 0.9;
+    }
+  }
+}
+
+:root {
+  --radius: 0.9rem;
+
+  /* Paper and ink: a warm notebook page instead of cold greys. */
+  --background: oklch(0.972 0.016 85);
+  --foreground: oklch(0.25 0.035 45);
+  --card: oklch(0.995 0.006 85);
+  --card-foreground: oklch(0.25 0.035 45);
+  --popover: oklch(0.995 0.006 85);
+  --popover-foreground: oklch(0.25 0.035 45);
+  --primary: oklch(0.6 0.2 33);
+  --primary-foreground: oklch(0.99 0.008 85);
+  --primary-edge: oklch(0.46 0.17 30);
+  --secondary: oklch(0.93 0.03 82);
+  --secondary-foreground: oklch(0.3 0.04 45);
+  --muted: oklch(0.945 0.022 84);
+  --muted-foreground: oklch(0.5 0.035 50);
+  --accent: oklch(0.915 0.05 86);
+  --accent-foreground: oklch(0.3 0.05 45);
+  --destructive: oklch(0.57 0.22 27);
+  --border: oklch(0.88 0.028 78);
+  --edge: oklch(0.82 0.035 75);
+  --input: oklch(0.86 0.03 78);
+  --ring: oklch(0.6 0.2 33);
+
+  --success: oklch(0.62 0.17 150);
+  --success-edge: oklch(0.48 0.14 150);
+  --success-soft: oklch(0.93 0.06 150);
+  --danger-soft: oklch(0.93 0.05 27);
+  --sun: oklch(0.83 0.165 85);
+  --sun-edge: oklch(0.68 0.15 75);
+  --sky: oklch(0.65 0.13 235);
+}
+
+.dark {
+  --background: oklch(0.2 0.02 50);
+  --foreground: oklch(0.95 0.016 85);
+  --card: oklch(0.245 0.022 50);
+  --card-foreground: oklch(0.95 0.016 85);
+  --popover: oklch(0.26 0.024 50);
+  --popover-foreground: oklch(0.95 0.016 85);
+  --primary: oklch(0.68 0.19 38);
+  --primary-foreground: oklch(0.2 0.03 45);
+  --primary-edge: oklch(0.5 0.16 33);
+  --secondary: oklch(0.3 0.025 50);
+  --secondary-foreground: oklch(0.95 0.016 85);
+  --muted: oklch(0.28 0.022 50);
+  --muted-foreground: oklch(0.72 0.03 70);
+  --accent: oklch(0.33 0.035 60);
+  --accent-foreground: oklch(0.95 0.016 85);
+  --destructive: oklch(0.7 0.19 25);
+  --border: oklch(1 0.02 85 / 13%);
+  --edge: oklch(0.15 0.02 50);
+  --input: oklch(1 0.02 85 / 16%);
+  --ring: oklch(0.68 0.19 38);
+
+  --success: oklch(0.7 0.17 150);
+  --success-edge: oklch(0.5 0.14 150);
+  --success-soft: oklch(0.3 0.06 150);
+  --danger-soft: oklch(0.3 0.07 27);
+  --sun: oklch(0.82 0.165 85);
+  --sun-edge: oklch(0.62 0.14 75);
+  --sky: oklch(0.72 0.12 235);
+}
+
+/* ── Prevent layout shift when Radix dialogs open ──
+   Radix injects scroll-locking styles that hide the scrollbar and add
+   compensating margin/padding, causing the page to jump. Override all
+   of that so the scrollbar stays visible and the layout never moves. */
+html,
+html.with-scroll-bars-hidden {
+  overflow-y: scroll !important;
+  padding-right: 0 !important;
+}
+
+html body[data-scroll-locked] {
+  margin-right: 0 !important;
+  padding-right: 0 !important;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}
+
+/* Fingers are bigger than cursors: small buttons grow on touch screens (the design keeps them compact with a mouse). */
+@media (pointer: coarse) {
+  [data-slot="button"] {
+    min-height: 2.5rem;
+  }
+  [data-slot="button"][data-size^="icon"] {
+    min-width: 2.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    text-rendering: optimizeLegibility;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button,
+  [role="button"],
+  summary {
+    cursor: pointer;
+  }
+}
+
+/* Spanish text is set in the serif, Greek and interface text in the sans. */
+@utility font-es {
+  font-family: var(--font-alegreya), Georgia, serif;
+  font-feature-settings: "kern", "liga", "lnum";
+  font-variant-numeric: lining-nums;
+}
+
+/* A card that looks pressed onto the page: flat border plus a solid lower edge. */
+@utility card-edge {
+  border: 2px solid var(--border);
+  box-shadow: 0 3px 0 0 var(--border);
+}
+
+@utility safe-bottom {
+  padding-bottom: max(env(safe-area-inset-bottom), 0px);
+}
+
+/* Lola, the mascot: illustration colours, identical in light and dark mode. */
+:root {
+  --lola-skin: #c98b62;
+  --lola-skin-shade: #b57652;
+  --lola-hair: #1d1412;
+  --lola-hair-shine: #4a352e;
+  --lola-top: #e5481f;
+  --lola-top-shade: #bf3a16;
+  --lola-lips: #c7324a;
+  --lola-mouth: #5a1620;
+  --lola-blush: #e8766b;
+  --lola-gold: #f2b82f;
+  --lola-eye: #fffaf2;
+  --lola-iris: #3d2a20;
+  --lola-anger: #e0301e;
+  --lola-pants: #3b5b8c;
+  --lola-pants-shade: #2e4870;
+  --lola-shoe: #fff8ec;
+  --lola-sole: #d9cdb8;
+}

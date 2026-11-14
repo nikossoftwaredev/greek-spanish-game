@@ -49,3 +49,6 @@ next-env.d.ts
 
 # playwright-cli session output (/site-qa)
 /.playwright-cli
+
+# course PDFs (copyrighted, ~180 MB): study material stays on the local machine
+/data/

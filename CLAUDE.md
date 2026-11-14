@@ -2,19 +2,24 @@
 
 Guidance for Claude Code when working in this repository. Detailed rules live in `.claude/rules/` and load automatically when you work on matching files. `.claude/rules/corrections.md`, `.claude/rules/deployment-urls.md` and `.claude/rules/ai-tooling.md` load every session, and they are binding.
 
+## What this project is
+
+**Vamos**: a fully static study game for a Greek speaker learning Spanish with **two course books, treated as equals**: *Aula Internacional Plus 1* (A1, chapters 0 to 9: vocabulary by page, grammar lessons, verbs) and *Gramática de uso del español* (107 units, each with theory and numbered exercises; the class writes homework as "50.2", unit 50 exercise 2). Both books have their own pages, grammar lessons, drills, "taught in class" ticks and practice. There is **no database, no auth, no backend**. Progress, homework and settings live in the browser's `localStorage`. It is deployed to Vercel as a static site.
+
+The course PDFs live in `data/` (git-ignored, copyrighted, never deployed). The content in `content/` is typed data transcribed from them, with original Greek explanations and original drills.
+
 ## Commands
 
 ```bash
-pnpm dev            # Dev server on http://localhost:3000
-pnpm build          # Production build (runs prisma generate first)
-pnpm start          # Start production server
-pnpm lint           # ESLint
-pnpm tsc --noEmit   # TypeScript check
+pnpm dev               # Dev server on http://localhost:3000 (Next moves to 3001 if taken: read the Local: line)
+pnpm build             # Production build, needs no env vars
+pnpm start             # Start production server
+pnpm lint              # ESLint
+pnpm tsc --noEmit      # TypeScript check
+pnpm validate:content  # Unique ids, answerable drills, known verbs, no em dashes in content/
+pnpm smoke:game        # Builds thousands of exercises and checks each can be answered
 npx shadcn@latest add <component>   # Add shadcn/ui components
-pnpm exec shadcn add @react-bits/<Name>-TS-TW   # Add a React Bits effect
 ```
-
-Before delivering a site: `/audit`, then `/site-qa`, until zero Blockers remain.
 
 Exact dependency versions: read `package.json`, don't assume.
 
@@ -25,58 +30,56 @@ Exact dependency versions: read `package.json`, don't assume.
 | `corrections.md` | always | Non-negotiables, incident log |
 | `deployment-urls.md` | always | Canonical origin, `NEXT_PUBLIC_SITE_URL`, Vercel |
 | `ai-tooling.md` | always | SkillSpector gate, what is installed and what stays out, delivery QA |
-| `animation.md` | `components/`, `lib/gsap.ts`, `app/` | GSAP via `lib/gsap.ts`, Lenis, reduced motion, React Bits |
+| `animation.md` | `components/`, `app/` | CSS motion, reduced motion |
 | `code-style.md` | any `.ts`/`.tsx` | Arrow functions, if/else, params, imports |
-| `react-nextjs.md` | `app/`, `components/`, `hooks/`, `server_actions/` | Server/client boundary, useEffect, performance, dnd-kit |
-| `ui-design.md` | `components/`, `.tsx`, `.css` | shadcn/Lucide, shared primitives, Button, ScrollArea, styling |
-| `i18n.md` | `messages/`, `lib/i18n/`, `app/` | next-intl, message keys, locale params |
+| `react-nextjs.md` | `app/`, `components/`, `hooks/` | Server/client boundary, useEffect, performance |
+| `ui-design.md` | `components/`, `.tsx`, `.css` | shadcn/Lucide, Button, ScrollArea, styling |
+| `i18n.md` | `app/`, `content/` | Greek-only UI, Spanish as data, content writing rules |
 | `dialog-system.md` | `components/`, `lib/stores/` | Central dialog store |
-| `file-uploads.md` | `lib/files/`, `server_actions/`, `app/api/` | Supabase/S3 uploads, sharp/WebP |
-| `landing-page.md` | `app/**/page.tsx`, `components/` | Navbar, mobile menu, business constants |
+| `study-engine.md` | `lib/game/`, `lib/srs/`, `lib/stores/`, `lib/lookup/`, `content/` | Content schema, exercises, FSRS, persistence, word lookup |
 
 Rule files use `paths:` frontmatter globs. Never write `app/[locale]/**` in one, because glob reads `[locale]` as a character class and the rule then silently never loads. Use `app/**` instead.
 
 ## Architecture
 
-### Tech Stack
+### Tech stack
 
-- **Next.js 16** (App Router, React Server Components), **React 19**, **TypeScript strict**
-- **NextAuth 4** (Google OAuth), **next-intl 4** (`en`, `el`, type-safe keys via `global.d.ts`)
-- **Tailwind CSS 4** (CSS variables, modern color space) plus **shadcn/ui** (New York style)
-- **Prisma 7** into Supabase PostgreSQL, **Zustand** (client state), **sharp** (image compression)
-- **GSAP** (plugins registered in `lib/gsap.ts`), **Lenis** smooth scroll on the GSAP ticker (public site only), **React Bits** effects via the shadcn registry
+- **Next.js 16** (App Router, all pages prerendered), **React 19**, **TypeScript strict**
+- **Tailwind CSS 4** (CSS variables, oklch) plus **shadcn/ui** (New York style), **Lucide** icons
+- **Zustand** with `persist` (localStorage) for progress, homework and settings
+- **ts-fsrs** (FSRS spaced repetition) for flashcards and word mastery
+- Browser APIs and free key-less web APIs: Wiktionary REST + MyMemory (tap-a-word lookup and Ask Lola)
 
-### Project Structure
+### Project structure
 
 ```
-app/[locale]/(site)/   # Public pages: page.tsx = landing, layout.tsx mounts Lenis
-app/[locale]/admin/    # Admin panel (native scroll, outside the Lenis group)
-app/[locale]/globals.css  # All CSS variables and tokens
-app/api/auth/[...nextauth]/  # NextAuth routes
-app/robots.ts, sitemap.ts    # Absolute URLs, must use SITE_URL
-components/            # Custom components (ui/ = shadcn ONLY, auth/, admin/, examples/)
-lib/auth/ lib/i18n/ lib/db/ lib/files/ lib/stores/
-lib/general/           # utils.ts (cn), constants.ts (business data), site-url.ts (SITE_URL)
-lib/gsap.ts            # The one place GSAP plugins are registered
-messages/              # en.json, el.json
-proxy.ts               # i18n middleware (NOT middleware.ts)
-types/                 # Shared interfaces
+app/layout.tsx          # Root: fonts (Alegreya for Spanish, Manrope for UI), providers
+app/(main)/             # Shell with header + bottom nav: home, units, practice, homework, verbs, progress
+app/play/[mode]/        # Full-screen game sessions (no shell)
+app/globals.css         # All tokens, keyframes, the .font-es utility
+components/             # app-shell/ home/ unit/ play/ learn/ (step-by-step lessons) mascot/ (Lola) homework/ progress/ verbs/ grammar/ (checklist) gramatica/ pdf/ practice/ + ui/ (shadcn ONLY)
+content/                # units/unit-0..9.ts (+ unit-N-pages.ts), verbs.ts, gramatica/ (107 GuUnit files + practice/ = drills per numbered exercise), gramatica-de-uso.ts (how the books line up)
+lib/game/               # text.ts (answer matching), builders.ts (exercise generators), lesson-steps.ts (step-by-step lessons), mastery.ts
+lib/mascot/             # Lola's lines (praise, scolding, verdicts)
+lib/lola/               # Ask Lola: local phrase search + MyMemory translation (content/phrasebook.ts holds the phrases)
+lib/srs/fsrs.ts         # FSRS wrapper and mastery levels
+lib/lookup/             # Tap-a-word: local index, function words, remote (Wiktionary, MyMemory)
+lib/homework/           # parse.ts + plan.ts: understands "50.2 51.4 κεφάλαιο 2 σελ. 30-32" and turns it into ticks and tasks
+lib/stores/             # progress, homework, settings, dialog stores
+lib/content/selectors.ts# Flattened content, lookups
+scripts/                # validate-content.ts, smoke-game.ts
+types/content.ts        # The content schema and its writing rules
+data/                   # Course PDFs. Git-ignored. Never commit, never deploy.
 ```
-
-## Environment & Auth Setup
-
-Required env vars (`.env.template` documents every one): `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `DATABASE_URL`, `DIRECT_URL`, and `NEXT_PUBLIC_SITE_URL` (**left unset until the real domain exists**, see `.claude/rules/deployment-urls.md`).
-
-Google OAuth: create an OAuth 2.0 Client ID at [Google Cloud Console](https://console.developers.google.com/apis/credentials) with redirect URIs `http://localhost:3000/api/auth/callback/google` (dev) and `https://your-domain.com/api/auth/callback/google` (prod).
 
 ## Definition of Done
 
 Work is complete only when all of these hold. Run them, don't assume:
 
 1. `pnpm tsc --noEmit` and `pnpm lint` show zero new errors, with output never filtered.
-2. The change was **driven, not just compiled**. UI: screenshot the running app and inspect it. Server or DB: hit the real route and read the data back.
-3. New or renamed i18n keys exist in BOTH `messages/en.json` and `messages/el.json`, and the dev server was restarted.
-4. Schema changes: migration run, `prisma generate` verified, dev server restarted.
+2. `pnpm validate:content` and `pnpm smoke:game` pass whenever `content/`, `lib/game/` or the exercise types changed.
+3. The change was **driven, not just compiled**. UI: screenshot the running app (mobile 390 px and desktop) and inspect it. Persistence: reload and read the data back from `localStorage`.
+4. `pnpm build` succeeds with no environment variables set.
 5. The abstracted lesson from any correction was written into `.claude/rules/`.
 
 ## Workflow
@@ -97,8 +100,8 @@ Work is complete only when all of these hold. Run them, don't assume:
 ## Writing Style
 
 - **Em dashes are never allowed.** Do not use the `—` character, and do not use `--` as a substitute for one.
-- This applies everywhere: UI copy, translation files (`messages/en.json`, `messages/el.json`), code comments, JSDoc, variable names, commit messages, PR descriptions, documentation, and chat responses.
-- Rewrite with a comma, a colon, parentheses, or two separate sentences instead.
+- This applies everywhere: UI copy, `content/` files, code comments, JSDoc, variable names, commit messages, PR descriptions, documentation, and chat responses.
+- Rewrite with a comma, a colon, parentheses, or two separate sentences instead. Spanish dialogues are written without dash marks ("¿Cómo te llamas? Me llamo Ana.").
 
 ## Screenshot Workflow
 
@@ -106,9 +109,9 @@ Puppeteer is a devDependency with bundled Chromium. Always screenshot from local
 
 ```bash
 node screenshot.mjs http://localhost:3000                 # -> screenshots/screenshot-N.png
-node screenshot.mjs http://localhost:3000/en/admin admin  # -> screenshot-N-admin.png
+node screenshot.mjs http://localhost:3000/units/1 unit1   # -> screenshot-N-unit1.png
 ```
 
-Screenshots auto-increment and are never overwritten. After capturing, read the PNG with the Read tool and inspect it. When comparing against a reference, be specific about differences: spacing, font sizes, colors (hex), alignment, border-radius, shadows.
+Screenshots auto-increment and are never overwritten. After capturing, read the PNG with the Read tool and inspect it. Check mobile (390 px wide) as well as desktop, because the game is mostly used on phones. When comparing against a reference, be specific about differences: spacing, font sizes, colors (hex), alignment, border-radius, shadows.
 
 **Auto-verification:** after each meaningful UI change (a section, component or layout adjustment), screenshot, inspect, fix, and re-screenshot until correct, then move on. Do NOT batch every change and screenshot once at the end.

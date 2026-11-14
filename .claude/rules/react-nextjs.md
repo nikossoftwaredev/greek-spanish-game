@@ -14,6 +14,7 @@ paths:
 - **`page.tsx` and `layout.tsx` stay server components.** Never add `"use client"` to them; extract a client child instead.
 - **Small components with isolated state.** A component that owns state re-renders only itself, and the Server Component parent ships zero JS for it.
 - **Always await `params`** in pages and layouts. It is a `Promise`, not a plain object (Next.js 16).
+- **Pages that read `useSearchParams()` sit under `<Suspense>`**, and dynamic routes set `dynamicParams = false` plus `generateStaticParams()`, so every page is prerendered.
 - **Never put `redirect()` inside try/catch.** It throws internally to trigger navigation, so catching it silently breaks the redirect.
 
   ```typescript

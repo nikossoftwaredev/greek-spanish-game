@@ -1,239 +1,59 @@
-# Next.js Auth + Internationalization + Prisma Starter
+# Vamos: ισπανικά με παιχνίδια
 
-A modern full-stack starter template built with Next.js 16, NextAuth.js, Prisma ORM, and next-intl for internationalization.
+Στατική εφαρμογή για να μαθαίνεις ισπανικά **ακριβώς πάνω στην ύλη του μαθήματος**: το βιβλίο *Aula Internacional Plus 1* (A1), κεφάλαια 0 έως 9, χωρισμένο όπως το βιβλίο. Δεν έχει βάση δεδομένων, ούτε λογαριασμούς: η πρόοδος και οι εργασίες αποθηκεύονται στον browser σου (`localStorage`).
 
-## 🚀 Quick Start
+## Τι κάνει
 
-### Use this template
+- **Δύο βιβλία, ισότιμα**: το *Aula Internacional Plus 1* (κεφάλαια 0–9) και η *Gramática de uso del español* (107 ενότητες, με θεωρία, πίνακες, συμβουλές για Έλληνες και πρωτότυπες ασκήσεις). Οι αριθμοί της καθηγήτριας, π.χ. «50.2» (ενότητα 50, άσκηση 2), καταλαβαίνονται από την εφαρμογή.
+- **Κεφάλαια του Aula**: για κάθε κεφάλαιο του βιβλίου, λεξιλόγιο (πάνω από 1.900 λέξεις, ανά σελίδα του βιβλίου), γραμματική με κανόνες, πίνακες και συμβουλές για Έλληνες, και τα ρήματα του κεφαλαίου. Δείχνει και τις σελίδες του βιβλίου και τις αντίστοιχες ενότητες της *Gramática de uso*.
+- **Παιχνίδια**: μικτό «μάθημα» (σαν Duolingo), φλας κάρτες με επανάληψη FSRS, αντιστοίχιση, γράψιμο με τόνους και ñ, κλίση ρημάτων, και εξάσκηση ανά θέμα γραμματικής (540 ασκήσεις).
+- **Πάτα σε οποιαδήποτε λέξη**: ανοίγει πάνελ που λέει από ποιο ρήμα προέρχεται, σε ποιο πρόσωπο και χρόνο είναι, τι σημαίνει (στα ελληνικά) και ένα παράδειγμα. Πρώτα ψάχνει στο βιβλίο (άμεσα, χωρίς ίντερνετ) και μετά στο Wiktionary και στο MyMemory.
+- **«Τι κάνατε σήμερα;»**: γράφεις όπως στο chat της τάξης (π.χ. `50.2 50.4 51.2 51.4 51.5`, `κεφάλαιο 2, σελ. 30-32`) και η εφαρμογή φτιάχνει τις εργασίες, τικάρει όσα κάνατε και δείχνει τι ζητά κάθε άσκηση.
+- **Εργασίες**: γράφεις ό,τι ζητά η καθηγήτρια (είδος, κεφάλαιο, σελίδα/άσκηση, προθεσμία) και πατάς «Εξάσκηση» για να το δουλέψεις παίζοντας.
+- **Πρόοδος**: πόντοι, σειρά ημερών, ημερήσιος στόχος, γνώση ανά κεφάλαιο, δικές σου αποθηκευμένες λέξεις, και αντίγραφο ασφαλείας σε αρχείο JSON.
+- **Κεφάλαιο της τάξης** και **λίστα γραμματικής**: διαλέγεις σε ποιο κεφάλαιο είστε και τικάρεις ποια θέματα γραμματικής έχετε διδαχθεί. Τα παιχνίδια δεν σου δίνουν ύλη που δεν έχετε κάνει ακόμα, και μπορείς να κάνεις εξάσκηση ακριβώς στα τικαρισμένα θέματα.
+- **Λεξιλόγιο ανά σελίδα**: κάθε κεφάλαιο δείχνει τις λέξεις ανά σελίδα του βιβλίου, και μπορείς να παίξεις μόνο με τις λέξεις μιας σελίδας.
+- **Οι ασκήσεις του βιβλίου μέσα στην εφαρμογή**: κάθε αριθμημένη άσκηση της *Gramática de uso* («50.2») παίζεται με το κουμπί «Κάν' την εδώ», χωρίς γράψιμο. Έχει 4 έως 6 ασκήσεις του ίδιου είδους με το βιβλίο, αλλά με νέες προτάσεις (οι προτάσεις του βιβλίου δεν αντιγράφονται), και τικάρεται μόνη της όταν την τελειώσεις. Αν ήταν εργασία και τελείωσες όλες τις ασκήσεις της, η εργασία ολοκληρώνεται μόνη της.
+- **Μάθε γραμματική βήμα βήμα**: σε κάθε θέμα γραμματικής (και των δύο βιβλίων) το κουμπί «Μάθε το βήμα βήμα με τη Λόλα» δείχνει έναν κανόνα τη φορά με παραδείγματα, σε δοκιμάζει σε κάθε κανόνα και κλείνει με μικρό τεστ.
+- **Η Λόλα**: η μασκότ της εφαρμογής, ένα πρωτότυπο σχέδιο SVG. Σε επιβραβεύει όταν απαντάς σωστά και σε μαλώνει (παιχνιδιάρικα) όταν κάνεις λάθος. Κλείνει από την «Πρόοδος», στις ρυθμίσεις.
+- **Ρώτα τη Λόλα**: πατάς πάνω της (ή στο εικονίδιο με το ερωτηματικό στην κορυφή) και γράφεις π.χ. «πώς λέμε είμαι έτοιμος;». Απαντά αμέσως από ένα δικό της βιβλίο με περίπου 100 φράσεις της τάξης και της καθημερινότητας (με σημειώσεις για το φύλο και την ευγένεια), ψάχνει και στις λέξεις του βιβλίου, και για οτιδήποτε άλλο ζητά αυτόματη μετάφραση από το MyMemory (σημειωμένη ως αυτόματη). Δουλεύει και ανάποδα: «τι σημαίνει tengo hambre».
+- **Στο κινητό**: η εφαρμογή προσαρμόζεται στην οθόνη του κινητού και εγκαθίσταται στην αρχική οθόνη («Προσθήκη στην αρχική οθόνη»). Την πρόοδο τη μεταφέρεις με «Μεταφορά προόδου» (αρχείο JSON, ή κοινοποίηση από το κινητό).
 
-Click the **"Use this template"** button on GitHub or use this direct link:
-
-[![Use this template](https://img.shields.io/badge/Use%20this%20template-2ea44f?style=for-the-badge)](https://github.com/nikossoftwaredev/next-auth-intl-prisma-starter/generate)
-
-This will create a new repository in your GitHub account with all the starter code.
-
-## Features
-
-- 🔐 **Authentication** with NextAuth.js (Google OAuth, easily extendable)
-- 🗄️ **Database** integration with Prisma ORM + Supabase (PostgreSQL)
-- 🌍 **Internationalization** with next-intl (English, Greek & Spanish)
-- 📝 **Todo CRUD** functionality with user-specific data
-- 🌙 **Dark/Light Mode** with next-themes and system preference detection
-- 🎨 **UI Components** from shadcn/ui (Radix UI + Tailwind CSS)
-- 📘 **TypeScript** with strict mode for better DX
-- ⚡ **Server Actions** for secure database operations
-- 🚀 **Next.js 15** with App Router and Turbopack
-- 📦 **PNPM** for fast, efficient package management
-- 🔧 **ESLint & Prettier** configured with best practices
-
-## Prerequisites
-
-- Node.js 18+
-- PNPM (required package manager)
-- PostgreSQL database
-
-## Getting Started
-
-### 1. Clone the repository or use the template
-
-**Option A: Use as a template (recommended)**
-1. Click the "Use this template" button on GitHub
-2. Clone your new repository:
-```bash
-git clone <your-new-repo-url>
-cd <your-repo-name>
-```
-
-**Option B: Clone directly**
-```bash
-git clone https://github.com/nikossoftwaredev/next-auth-intl-prisma-starter.git
-cd next-auth-intl-prisma-starter
-```
-
-### 2. Install dependencies
+## Τρέξιμο
 
 ```bash
 pnpm install
+pnpm dev        # http://localhost:3000 (ή 3001 αν το 3000 είναι πιασμένο)
+pnpm build      # δεν χρειάζεται καμία μεταβλητή περιβάλλοντος
 ```
 
-### 3. Set up environment variables
+Έλεγχοι: `pnpm tsc --noEmit`, `pnpm lint`, `pnpm validate:content`, `pnpm smoke:game`.
 
-Create a `.env.local` file in the root directory:
+## Ανέβασμα στο Vercel
 
-```env
-# Database
-DATABASE_URL="postgresql://username:password@localhost:5432/database_name?schema=public"
-DIRECT_URL="postgresql://username:password@localhost:5432/database_name?schema=public"
+1. Ανέβασε το repository στο GitHub (ο φάκελος `data/` με τα PDF είναι στο `.gitignore` και **δεν** ανεβαίνει).
+2. Στο Vercel: *Add New Project*, διάλεξε το repository. Framework: Next.js. Δεν χρειάζεται καμία μεταβλητή περιβάλλοντος.
+3. Deploy. Κάθε `git push` στο `main` ξανακάνει deploy.
 
-# NextAuth.js
-NEXTAUTH_SECRET="your-secret-key-here" # Generate with: openssl rand -base64 32
-NEXTAUTH_URL="http://localhost:3000"
+Η πρόοδος είναι ανά συσκευή και ανά browser. Για να τη μεταφέρεις αλλού, χρησιμοποίησε «Αντίγραφο ασφαλείας» στη σελίδα Πρόοδος.
 
-# Google OAuth
-GOOGLE_CLIENT_ID="your-google-client-id"
-GOOGLE_CLIENT_SECRET="your-google-client-secret"
-```
+## Ιδιωτικότητα και εξωτερικές υπηρεσίες
 
-### 4. Set up Google OAuth
+Όλα τρέχουν στον browser. Μόνο όταν πατάς μια λέξη, η λέξη αυτή (τίποτα άλλο) στέλνεται στο [Wiktionary](https://en.wiktionary.org/api/rest_v1/) και στο [MyMemory](https://mymemory.translated.net/doc/spec.php). Το ίδιο ισχύει για το «Ρώτα τη Λόλα»: όταν η φράση δεν υπάρχει στο έτοιμο βιβλίο φράσεων, μόνο το κείμενο που έγραψες στέλνεται στο MyMemory για μετάφραση. Οι απαντήσεις αποθηκεύονται τοπικά για 30 ημέρες. Η εφαρμογή δεν έχει ήχο: η φωνή του browser δεν προφέρει σωστά τα ισπανικά, οπότε αφαιρέθηκε.
 
-1. Go to [Google Cloud Console](https://console.developers.google.com/apis/credentials)
-2. Create a new OAuth 2.0 Client ID (or use existing)
-3. Add authorized redirect URIs:
-   - Development: `http://localhost:3000/api/auth/callback/google`
-   - Production: `https://your-domain.com/api/auth/callback/google`
-4. Copy the Client ID and Client Secret to your `.env.local`
-
-### 5. Set up the database
-
-#### Option A: Use a local PostgreSQL database
-
-1. Install PostgreSQL if not already installed
-2. Create a new database
-3. Update the `DATABASE_URL` in `.env.local`
-
-#### Option B: Use a hosted database service
-
-Popular options:
-- [Neon](https://neon.tech) - Serverless Postgres
-- [Supabase](https://supabase.com) - Postgres with additional features
-- [Railway](https://railway.app) - Simple deployment platform
-- [PlanetScale](https://planetscale.com) - MySQL-compatible (requires changing provider in schema.prisma)
-
-### 6. Initialize Prisma and create database tables
-
-```bash
-# Generate Prisma Client
-pnpm prisma generate
-
-# Create database tables
-pnpm prisma db push
-
-# (Optional) Open Prisma Studio to view your database
-pnpm prisma studio
-```
-
-### 7. Run the development server
-
-```bash
-pnpm dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser.
-
-## Database Schema
-
-The application uses two main models:
-
-- **User**: Stores authenticated user information from Google OAuth
-- **Todo**: Stores user-specific todo items with title, description, and completion status
-
-## Project Structure
+## Δομή
 
 ```
-├── app/                    # Next.js app directory
-│   ├── [locale]/          # Locale-based routing
-│   └── api/auth/          # NextAuth API routes
-├── components/
-│   ├── ui/                # shadcn/ui components
-│   ├── auth/              # Authentication components
-│   └── examples/          # Todo CRUD components
-├── lib/
-│   ├── auth/              # NextAuth configuration
-│   ├── i18n/              # Internationalization config
-│   └── prisma.ts          # Prisma client singleton
-├── server_actions/
-│   └── todos.ts           # Todo CRUD server actions
-├── prisma/
-│   └── schema.prisma      # Database schema (or lib/db/schema.prisma)
-├── messages/              # Translation files
-│   ├── en.json            # English translations
-│   ├── el.json            # Greek translations
-│   └── es.json            # Spanish translations
-└── types/                 # TypeScript definitions
+content/        τα κεφάλαια (units/unit-0..9.ts), τα ρήματα, η αντιστοίχιση με τη Gramática de uso
+types/content.ts  το σχήμα του περιεχομένου και οι κανόνες γραφής
+lib/game/       έλεγχος απαντήσεων, δημιουργία ασκήσεων
+lib/srs/        επανάληψη FSRS (ts-fsrs)
+lib/lookup/     το πάνελ λέξης (τοπικό ευρετήριο + Wiktionary + MyMemory)
+lib/lola/       το «Ρώτα τη Λόλα» (τοπική αναζήτηση + μετάφραση MyMemory), content/phrasebook.ts
+lib/stores/     πρόοδος, εργασίες, ρυθμίσεις (localStorage)
+components/     τα components της εφαρμογής (learn = μαθήματα βήμα βήμα, mascot = η Λόλα), components/ui = shadcn
 ```
 
-## Available Scripts
+## Πνευματικά δικαιώματα
 
-```bash
-pnpm dev          # Start development server
-pnpm build        # Build for production
-pnpm start        # Start production server
-pnpm lint         # Run ESLint
-pnpm tsc --noEmit # Type check
-
-# Prisma commands
-pnpm prisma generate     # Generate Prisma Client
-pnpm prisma db push      # Push schema changes to database
-pnpm prisma db pull      # Pull schema from database
-pnpm prisma migrate dev  # Create and apply migrations (development)
-pnpm prisma migrate deploy # Apply migrations (production)
-pnpm prisma studio       # Open Prisma Studio GUI
-```
-
-## Deployment
-
-### Database Migration
-
-For production deployments, use migrations instead of `db push`:
-
-```bash
-# Create a migration
-pnpm prisma migrate dev --name init
-
-# Deploy migrations in production
-pnpm prisma migrate deploy
-```
-
-### Environment Variables
-
-Make sure to set all required environment variables in your deployment platform:
-
-- `DATABASE_URL` - Production database connection string (pooled connection)
-- `DIRECT_URL` - Direct database connection string (non-pooled, for migrations)
-- `NEXTAUTH_SECRET` - Strong secret key (different from development)
-- `NEXTAUTH_URL` - Your production URL
-- `GOOGLE_CLIENT_ID` - Same as development or production-specific
-- `GOOGLE_CLIENT_SECRET` - Same as development or production-specific
-
-Note: For services like Supabase or PlanetScale, `DATABASE_URL` is typically the pooled connection URL, while `DIRECT_URL` is the direct connection URL used for migrations.
-
-### Deployment Platforms
-
-This app can be deployed to:
-- [Vercel](https://vercel.com) - Recommended for Next.js apps
-- [Netlify](https://netlify.com)
-- [Railway](https://railway.app)
-- Any platform supporting Node.js
-
-## Troubleshooting
-
-### Database Connection Issues
-
-If you encounter connection issues:
-
-1. Verify your `DATABASE_URL` is correct
-2. Ensure PostgreSQL is running
-3. Check firewall/network settings
-4. For SSL connections, add `?sslmode=require` to the connection string
-
-### Prisma Client Generation
-
-If TypeScript can't find Prisma types:
-
-```bash
-pnpm prisma generate
-```
-
-### Google OAuth Issues
-
-- Ensure redirect URIs match exactly (including trailing slashes)
-- Check that your Google Cloud project has the necessary APIs enabled
-- Verify client ID and secret are correct
-
-## License
-
-MIT
-
-## Contributing
-
-Pull requests are welcome! Please check existing issues before submitting new ones.
+Τα PDF του μαθήματος είναι δικά σου και μένουν μόνο στον υπολογιστή σου (`data/`). Από το βιβλίο έχουν μεταφερθεί μόνο λέξεις και πίνακες ρημάτων (γεγονότα). Τα παραδείγματα, οι ασκήσεις και οι εξηγήσεις είναι πρωτότυπα.

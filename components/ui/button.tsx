@@ -22,8 +22,17 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         brand:
           "bg-[var(--brand-primary,hsl(var(--primary)))] text-white hover:opacity-90 active:scale-[0.98]",
+        chunky:
+          "rounded-xl bg-primary font-bold text-primary-foreground shadow-[0_4px_0_0_var(--primary-edge)] hover:brightness-105 active:translate-y-[3px] active:shadow-[0_1px_0_0_var(--primary-edge)]",
+        "chunky-outline":
+          "rounded-xl border-2 border-border bg-card font-bold text-foreground shadow-[0_4px_0_0_var(--border)] hover:bg-muted active:translate-y-[3px] active:shadow-[0_1px_0_0_var(--border)]",
+        success:
+          "rounded-xl bg-success font-bold text-white shadow-[0_4px_0_0_var(--success-edge)] hover:brightness-105 active:translate-y-[3px] active:shadow-[0_1px_0_0_var(--success-edge)]",
+        danger:
+          "rounded-xl bg-destructive font-bold text-white shadow-[0_4px_0_0_oklch(0.42_0.17_27)] hover:brightness-105 active:translate-y-[3px] active:shadow-[0_1px_0_0_oklch(0.42_0.17_27)]",
       },
       size: {
+        xl: "h-12 px-8 text-base has-[>svg]:px-6",
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
         xs: "h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
         sm: "h-8 gap-1.5 rounded-md px-3 has-[>svg]:px-2.5",

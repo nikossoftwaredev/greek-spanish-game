@@ -48,7 +48,7 @@ export const ConfirmDialog = () => {
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="flex-row justify-center gap-2 sm:justify-center">
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>Άκυρο</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleConfirm}
             className={buttonVariants({ variant: "destructive" })}
