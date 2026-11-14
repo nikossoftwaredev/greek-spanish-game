@@ -26,7 +26,6 @@ export interface ChoiceExercise extends BaseExercise {
   promptLang: Lang;
   /** Greek help shown under a Spanish prompt (grammar drills). */
   promptHintEl?: string;
-  emoji?: string;
   options: string[];
   optionsLang: Lang;
   answer: string;
@@ -41,7 +40,6 @@ export interface TypeExercise extends BaseExercise {
   promptText: string;
   promptLang: Lang;
   promptHintEl?: string;
-  emoji?: string;
   /** Every correct typed answer. The first one is displayed as the solution. */
   accepted: string[];
   /** When set, the sentence is shown with a gap: `before` [input] `after`. */
@@ -54,7 +52,7 @@ export interface TypeExercise extends BaseExercise {
 export interface MatchExercise extends BaseExercise {
   kind: "match";
   /** In the order the Spanish cards are shown. */
-  pairs: { id: string; es: string; el: string; emoji?: string; vocabId?: string }[];
+  pairs: { id: string; es: string; el: string; vocabId?: string }[];
   /** Pair ids in the (different) order the Greek cards are shown. */
   elOrder: string[];
 }

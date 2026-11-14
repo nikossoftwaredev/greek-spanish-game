@@ -76,7 +76,6 @@ const esToElChoice = ({ item, pool }: { item: FlatVocab; pool: FlatVocab[] }): C
   instructionEl: "Τι σημαίνει;",
   promptText: withArticle(item),
   promptLang: "es",
-  emoji: item.emoji,
   options: shuffle([item.el, ...distractorsFor({ item, pool, read: (entry) => entry.el })]),
   optionsLang: "el",
   answer: item.el,
@@ -90,21 +89,6 @@ const elToEsChoice = ({ item, pool }: { item: FlatVocab; pool: FlatVocab[] }): C
   instructionEl: "Πώς λέγεται στα ισπανικά;",
   promptText: item.el,
   promptLang: "el",
-  emoji: item.emoji,
-  options: shuffle([withArticle(item), ...distractorsFor({ item, pool, read: withArticle })]),
-  optionsLang: "es",
-  answer: withArticle(item),
-  example: item.example,
-});
-
-const emojiToEsChoice = ({ item, pool }: { item: FlatVocab; pool: FlatVocab[] }): ChoiceExercise => ({
-  ...choiceBase(item),
-  id: nextId("emoji-es"),
-  kind: "choice",
-  instructionEl: "Ποια λέξη ταιριάζει στην εικόνα;",
-  promptText: "",
-  promptLang: "es",
-  emoji: item.emoji,
   options: shuffle([withArticle(item), ...distractorsFor({ item, pool, read: withArticle })]),
   optionsLang: "es",
   answer: withArticle(item),
@@ -118,7 +102,6 @@ const elToEsType = (item: FlatVocab): TypeExercise => ({
   instructionEl: "Γράψε το στα ισπανικά",
   promptText: item.el,
   promptLang: "el",
-  emoji: item.emoji,
   accepted: acceptedForms(item),
   explainEl: item.noteEl,
   example: item.example,
@@ -128,7 +111,7 @@ const matchRound = ({ items }: { items: FlatVocab[] }): MatchExercise => ({
   id: nextId("match"),
   skill: "vocab",
   kind: "match",
-  pairs: shuffle(items).map((item) => ({ id: item.id, es: withArticle(item), el: item.el, emoji: item.emoji, vocabId: item.id })),
+  pairs: shuffle(items).map((item) => ({ id: item.id, es: withArticle(item), el: item.el, vocabId: item.id })),
   elOrder: shuffle(items.map((item) => item.id)),
 });
 
@@ -233,7 +216,6 @@ const exerciseForWord = ({ item, pool, card }: { item: FlatVocab; pool: FlatVoca
 
   if (mastery === "new") {
     options.push(esToElChoice({ item, pool }));
-    if (item.emoji) options.push(emojiToEsChoice({ item, pool }));
     options.push(elToEsChoice({ item, pool }));
   } else if (mastery === "learning") {
     options.push(elToEsChoice({ item, pool }), esToElChoice({ item, pool }));

@@ -45,7 +45,6 @@ const WordRow = ({ item }: { item: VocabItem }) => {
       <span className={cn("mt-2 size-2.5 shrink-0 rounded-full", mastery.dot)} title={mastery.label} aria-label={mastery.label} />
       <div className="min-w-0 flex-1">
         <p className="flex flex-wrap items-baseline gap-x-2">
-          {item.emoji && <span aria-hidden>{item.emoji}</span>}
           <TappableText text={withArticle(item)} context={item.example} className="font-es text-xl leading-snug font-semibold" />
         </p>
         <p className="text-sm leading-snug font-semibold text-muted-foreground">{item.el}</p>
@@ -231,7 +230,6 @@ export const VocabList = ({ groups, unitId }: VocabListProps) => {
             <div key={group.id} className="space-y-2">
               {(view === "topics" || section.groups.length > 1) && (
                 <h4 className="flex items-center gap-2 text-sm font-extrabold tracking-wide text-muted-foreground uppercase">
-                  {group.emoji && <span aria-hidden>{group.emoji}</span>}
                   {group.titleEs} <span className="font-semibold normal-case">· {group.titleEl}</span>
                   {view === "topics" && group.page !== undefined && <SourceLink book="aula" page={aulaPdfPage(group.page)} label={`σελ. ${group.page}`} variant="secondary" size="xs" />}
                   <span className="ml-auto rounded-full bg-muted px-2 py-0.5 text-xs">{group.items.length}</span>

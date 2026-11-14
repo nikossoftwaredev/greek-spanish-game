@@ -68,7 +68,7 @@ export const MatchView = ({ exercise, onComplete, onReady }: ExerciseViewProps<M
     return "border-border bg-card shadow-[0_3px_0_0_var(--border)] hover:bg-muted";
   };
 
-  const renderCard = ({ side, id, text, emoji }: { side: Side; id: string; text: string; emoji?: string }) => (
+  const renderCard = ({ side, id, text }: { side: Side; id: string; text: string }) => (
     <button
       key={`${side}-${id}`}
       type="button"
@@ -80,10 +80,7 @@ export const MatchView = ({ exercise, onComplete, onReady }: ExerciseViewProps<M
         cardClass({ side, id }),
       )}
     >
-      <span className="flex items-center gap-2">
-        {emoji && side === "es" && <span aria-hidden>{emoji}</span>}
-        {text}
-      </span>
+      <span>{text}</span>
       {matched.includes(id) && <Check className="size-4 shrink-0 text-success" aria-hidden />}
     </button>
   );
@@ -93,7 +90,7 @@ export const MatchView = ({ exercise, onComplete, onReady }: ExerciseViewProps<M
       <PromptHeader instruction="Αντιστοίχισε κάθε λέξη με τη σημασία της" />
       <div className="grid grid-cols-2 gap-x-3 gap-y-0">
         <div className="space-y-2.5">
-          {exercise.pairs.map((pair) => renderCard({ side: "es", id: pair.id, text: pair.es, emoji: pair.emoji }))}
+          {exercise.pairs.map((pair) => renderCard({ side: "es", id: pair.id, text: pair.es }))}
         </div>
         <div className="space-y-2.5">
           {exercise.elOrder.map((id) => renderCard({ side: "el", id, text: byId.get(id)?.el ?? "" }))}

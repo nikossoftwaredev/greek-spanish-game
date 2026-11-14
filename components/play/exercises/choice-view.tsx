@@ -34,7 +34,6 @@ export const ChoiceView = ({ exercise, locked, result, onComplete }: ExerciseVie
     <div className="flex flex-1 flex-col gap-6">
       <PromptHeader
         instruction={exercise.instructionEl}
-        emoji={exercise.emoji}
         hint={exercise.promptHintEl}
         prompt={
           exercise.promptText && exercise.promptLang === "es" ? (

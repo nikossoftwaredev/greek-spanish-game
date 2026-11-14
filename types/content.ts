@@ -49,8 +49,6 @@ export interface VocabItem {
   pos: PartOfSpeech;
   /** Nouns only. */
   gender?: Gender;
-  /** One emoji that helps memory (professions, food, places, objects). Omit when it does not fit. */
-  emoji?: string;
   /** Short Greek note: false friend, usage, memory hook. Optional. */
   noteEl?: string;
   /** An ORIGINAL A1 sentence using the word, with its Greek translation. */
@@ -69,7 +67,6 @@ export interface VocabGroup {
   section?: string;
   titleEs: string;
   titleEl: string;
-  emoji?: string;
   items: VocabItem[];
 }
 

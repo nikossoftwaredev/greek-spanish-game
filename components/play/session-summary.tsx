@@ -3,7 +3,7 @@
 import { Clock, Flame, RotateCcw, Star, Target, Trophy } from "lucide-react";
 import Link from "next/link";
 
-import { AskLola } from "@/components/mascot/ask-lola";
+import { LolaVerdict } from "@/components/mascot/lola-verdict";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { todayKey } from "@/lib/game/text";
@@ -80,14 +80,15 @@ export const SessionSummary = ({ title, xpGained, correct, wrong, seconds, exitH
 
       <div className="space-y-3">
         {mascot ? (
-          <AskLola body="full" mood={verdict.mood} className="mx-auto h-60 w-auto" />
+          <LolaVerdict line={verdict} />
         ) : (
-          <span className="mx-auto grid size-24 place-items-center rounded-full bg-sun shadow-[0_5px_0_0_var(--sun-edge)] motion-safe:animate-pop">
-            <Trophy className="size-12 text-foreground" aria-hidden />
-          </span>
+          <>
+            <span className="mx-auto grid size-24 place-items-center rounded-full bg-sun shadow-[0_5px_0_0_var(--sun-edge)] motion-safe:animate-pop">
+              <Trophy className="size-12 text-foreground" aria-hidden />
+            </span>
+            <h1 className="font-es text-4xl font-bold italic">{plainHeadline}</h1>
+          </>
         )}
-        <h1 className="font-es text-4xl font-bold italic">{mascot ? verdict.line.es : plainHeadline}</h1>
-        {mascot && <p className="mx-auto max-w-xs text-lg font-bold">{verdict.line.el}</p>}
         <p className="text-muted-foreground">{title}</p>
       </div>
 

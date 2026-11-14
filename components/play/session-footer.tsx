@@ -2,8 +2,8 @@
 
 import { ArrowRight, Check, SkipForward, X } from "lucide-react";
 
-import type { LolaMood } from "@/components/mascot/lola";
-import { LolaStanding } from "@/components/mascot/lola-companion";
+import { LolaFooterStage } from "@/components/mascot/lola-companion";
+import { SpeechBubble } from "@/components/mascot/speech-bubble";
 import { TappableText } from "@/components/tappable-text";
 import { Button } from "@/components/ui/button";
 import type { Exercise, ExerciseResult } from "@/lib/game/types";
@@ -44,8 +44,23 @@ export const SessionFooter = ({
   const example = "example" in exercise ? exercise.example : undefined;
   const reaction = lolaReaction({ correct: result?.correct ?? false, position });
   const plainTitle = result?.correct ? PRAISE[position % PRAISE.length] : "Όχι ακριβώς";
-  let standingMood: LolaMood = "teaching";
-  if (result) standingMood = result.correct ? "happy" : "angry";
+
+  /** The right answer and the helpful extras, shown inside Lola's bubble or, without her, on their own. */
+  const details = result && (
+    <>
+      {showSolution && (
+        <p className="text-sm">
+          Σωστή απάντηση: <TappableText text={result.solution ?? ""} className="font-es text-lg font-bold" />
+        </p>
+      )}
+      {!result.correct && example && (
+        <p className="text-sm opacity-85">
+          Παράδειγμα: <TappableText text={example.es} context={example} className="font-es text-base" /> ({example.el})
+        </p>
+      )}
+      {exercise.kind === "match" && !result.correct && <p className="text-sm opacity-85">Έκανες μερικά λάθη στο ταίριασμα, θα τα ξαναδείς.</p>}
+    </>
+  );
 
   return (
     <footer
@@ -56,39 +71,31 @@ export const SessionFooter = ({
         checked && !result.correct && "border-destructive/40 bg-danger-soft",
       )}
     >
-      <LolaStanding mood={standingMood} animateKey={`${position}-${checked}`} />
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 px-4 py-4">
-        {checked && (
+      <LolaFooterStage mood={checked ? reaction.mood : "teaching"} animateKey={`${position}-${checked}`} className="flex flex-col gap-3">
+        {checked && mascot && (
+          <SpeechBubble tone={result.correct ? "cheer" : "loud"} tail="left-low" className="space-y-1">
+            <p role="status" className="font-es text-xl leading-tight font-bold italic">
+              {reaction.es}
+              <span className="sr-only">{result.correct ? " Σωστά." : " Λάθος."}</span>
+            </p>
+            <p className="text-sm leading-snug font-bold">{reaction.el}</p>
+            {details}
+          </SpeechBubble>
+        )}
+
+        {checked && !mascot && (
           <div className="flex items-start gap-3 motion-safe:animate-rise" role="status">
-            {!mascot && (
-              <span
-                className={cn(
-                  "mt-0.5 grid size-9 shrink-0 place-items-center rounded-full text-white",
-                  result.correct ? "bg-success" : "bg-destructive",
-                )}
-              >
-                {result.correct ? <Check className="size-5" aria-hidden /> : <X className="size-5" aria-hidden />}
-              </span>
-            )}
+            <span
+              className={cn(
+                "mt-0.5 grid size-9 shrink-0 place-items-center rounded-full text-white",
+                result.correct ? "bg-success" : "bg-destructive",
+              )}
+            >
+              {result.correct ? <Check className="size-5" aria-hidden /> : <X className="size-5" aria-hidden />}
+            </span>
             <div className="min-w-0 space-y-0.5">
-              <p className={cn("text-lg font-extrabold", result.correct ? "text-success" : "text-destructive")}>
-                {mascot ? <TappableText text={reaction.es} className="font-es italic" /> : plainTitle}
-                {mascot && <span className="sr-only">{result.correct ? " Σωστά." : " Λάθος."}</span>}
-              </p>
-              {mascot && <p className="text-sm leading-snug">{reaction.el}</p>}
-              {showSolution && (
-                <p className="text-sm">
-                  Σωστή απάντηση: <TappableText text={result.solution ?? ""} className="font-es text-lg font-bold" />
-                </p>
-              )}
-              {!result.correct && example && (
-                <p className="text-sm text-muted-foreground">
-                  Παράδειγμα: <TappableText text={example.es} context={example} className="font-es text-base" /> ({example.el})
-                </p>
-              )}
-              {exercise.kind === "match" && !result.correct && (
-                <p className="text-sm text-muted-foreground">Έκανες μερικά λάθη στο ταίριασμα, θα τα ξαναδείς.</p>
-              )}
+              <p className={cn("text-lg font-extrabold", result.correct ? "text-success" : "text-destructive")}>{plainTitle}</p>
+              {details}
             </div>
           </div>
         )}
@@ -119,7 +126,7 @@ export const SessionFooter = ({
             </Button>
           )}
         </div>
-      </div>
+      </LolaFooterStage>
     </footer>
   );
 };

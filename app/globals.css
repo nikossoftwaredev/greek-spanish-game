@@ -46,6 +46,23 @@
   --animate-rise: rise 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-float-up: float-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-sway: sway 3.6s ease-in-out infinite;
+  --animate-bubble-life: bubble-life 7s ease-in-out 0.6s both;
+
+  @keyframes bubble-life {
+    0% {
+      opacity: 0;
+      transform: translateY(6px) scale(0.9);
+    }
+    8%,
+    88% {
+      opacity: 1;
+      transform: none;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-4px) scale(0.95);
+    }
+  }
 
   @keyframes sway {
     0%,
@@ -253,20 +270,26 @@ html body[data-scroll-locked] {
 /* Lola, the mascot: illustration colours, identical in light and dark mode. */
 :root {
   --lola-skin: #c98b62;
-  --lola-skin-shade: #b57652;
-  --lola-hair: #1d1412;
-  --lola-hair-shine: #4a352e;
-  --lola-top: #e5481f;
-  --lola-top-shade: #bf3a16;
-  --lola-lips: #c7324a;
-  --lola-mouth: #5a1620;
+  --lola-skin-shade: #a86a45;
+  --lola-hair: #141a3d;
+  --lola-hair-shine: #3b6fe0;
+  --lola-top: #ffc928;
+  --lola-top-shade: #d99a12;
+  --lola-jacket: #1fa3ad;
+  --lola-jacket-shade: #157a85;
+  --lola-line: #0f1330;
+  --lola-lips: #c2455a;
+  --lola-lip-shine: #ff9fae;
+  --lola-mouth: #4a1220;
+  --lola-tongue: #e0707f;
   --lola-blush: #e8766b;
   --lola-gold: #f2b82f;
   --lola-eye: #fffaf2;
-  --lola-iris: #3d2a20;
+  --lola-iris: #2f8f5b;
   --lola-anger: #e0301e;
-  --lola-pants: #3b5b8c;
-  --lola-pants-shade: #2e4870;
+  --lola-drop: #7cc8f0;
+  --lola-pants: #2c3e73;
+  --lola-pants-shade: #1f2c55;
   --lola-shoe: #fff8ec;
   --lola-sole: #d9cdb8;
 }

@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { CONFIRM_DIALOG } from "@/components/confirm-dialog";
-import { AskLola } from "@/components/mascot/ask-lola";
-import { LolaStanding } from "@/components/mascot/lola-companion";
+import { LolaFooterStage } from "@/components/mascot/lola-companion";
+import { LolaVerdict } from "@/components/mascot/lola-verdict";
 import { Button } from "@/components/ui/button";
 import { lessonByKey } from "@/lib/content/selectors";
 import { buildLessonSteps, type LessonStep } from "@/lib/game/lesson-steps";
@@ -120,17 +120,16 @@ const LessonRun = ({ lessonKey, exitHref, onAgain }: LessonRunProps) => {
         return (
           <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
             {mascot ? (
-              <AskLola body="full" mood={verdict.mood} className="h-60 w-auto" />
+              <LolaVerdict line={verdict} />
             ) : (
-              <span className="grid size-24 place-items-center rounded-full bg-sun shadow-[0_5px_0_0_var(--sun-edge)] motion-safe:animate-pop">
-                <Trophy className="size-12" aria-hidden />
-              </span>
+              <>
+                <span className="grid size-24 place-items-center rounded-full bg-sun shadow-[0_5px_0_0_var(--sun-edge)] motion-safe:animate-pop">
+                  <Trophy className="size-12" aria-hidden />
+                </span>
+                <h1 className="font-es text-4xl font-bold italic">¡Muy bien!</h1>
+              </>
             )}
-            <div className="space-y-2">
-              <h1 className="font-es text-4xl font-bold italic">{mascot ? verdict.line.es : "¡Muy bien!"}</h1>
-              {mascot && <p className="mx-auto max-w-xs text-lg font-bold">{verdict.line.el}</p>}
-              <p className="text-muted-foreground">Τελείωσες το μάθημα «{entry.lesson.titleEl}».</p>
-            </div>
+            <p className="text-muted-foreground">Τελείωσες το μάθημα «{entry.lesson.titleEl}».</p>
             <p className="flex items-center gap-2 rounded-full bg-sun/30 px-4 py-1.5 font-extrabold tabular-nums">
               <Star className="size-5 fill-sun text-sun-edge" aria-hidden /> +{stats.xp} πόντοι
             </p>
@@ -170,12 +169,11 @@ const LessonRun = ({ lessonKey, exitHref, onAgain }: LessonRunProps) => {
 
       {!isExercise && step.kind !== "done" && (
         <footer className="safe-bottom fixed inset-x-0 bottom-0 z-30 border-t-2 border-border bg-background">
-          <LolaStanding mood="teaching" animateKey={index} />
-          <div className="mx-auto flex w-full max-w-2xl justify-end px-4 py-4">
+          <LolaFooterStage mood="teaching" animateKey={index} className="flex justify-end">
             <Button type="button" variant="chunky" size="xl" className="min-w-44" onClick={() => goNext({ xp: 0 })}>
               {step.kind === "intro" ? "Ξεκίνα" : "Κατάλαβα"} <ArrowRight />
             </Button>
-          </div>
+          </LolaFooterStage>
         </footer>
       )}
     </div>

@@ -189,7 +189,7 @@ export const WordLookupDialog = () => {
             <Section key={item.id} icon={<BookOpen className="size-3.5" />} title={`Στο βιβλίο, κεφάλαιο ${item.unitId}${item.page === undefined ? "" : `, σελίδα ${item.page}`}`}>
               <div className="space-y-1">
                 <p className="font-es text-xl font-semibold">
-                  {item.emoji} {withArticle(item)}
+                  {withArticle(item)}
                 </p>
                 <p>{item.el}</p>
                 <div className="flex flex-wrap items-center gap-2">

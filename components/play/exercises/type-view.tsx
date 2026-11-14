@@ -102,7 +102,6 @@ export const TypeView = ({ exercise, locked, result, onReady, onComplete }: Exer
     <div className="flex flex-1 flex-col gap-6">
       <PromptHeader
         instruction={exercise.instructionEl}
-        emoji={exercise.emoji}
         hint={exercise.promptHintEl}
         prompt={promptNode}
       />

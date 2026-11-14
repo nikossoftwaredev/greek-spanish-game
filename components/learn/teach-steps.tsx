@@ -1,16 +1,17 @@
 import { Lightbulb } from "lucide-react";
 
 import { GrammarTable } from "@/components/grammar/grammar-table";
+import { SpeechBubble } from "@/components/mascot/speech-bubble";
 import { TappableText } from "@/components/tappable-text";
 import { lolaNudge } from "@/lib/mascot/lines";
 import type { GrammarLesson, GrammarRule, GrammarTable as GrammarTableData } from "@/types/content";
 
 /** What Lola says: a speech bubble. She is standing on the footer below. */
 const Say = ({ children }: { children: React.ReactNode }) => (
-  <div className="rounded-3xl rounded-bl-md border-2 border-border bg-card px-4 py-3 text-base leading-snug shadow-[0_3px_0_0_var(--border)]">
+  <SpeechBubble tail="down-left" className="text-base leading-snug">
     <p className="mb-0.5 text-xs font-extrabold tracking-wide text-primary uppercase">Λόλα</p>
     {children}
-  </div>
+  </SpeechBubble>
 );
 
 export const IntroStep = ({ lesson, stepCount }: { lesson: GrammarLesson; stepCount: number }) => (

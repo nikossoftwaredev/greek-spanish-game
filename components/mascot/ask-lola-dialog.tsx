@@ -15,6 +15,7 @@ import { translateText } from "@/lib/lola/translate";
 import { useDialogStore } from "@/lib/stores/dialog-store";
 
 import { Lola, type LolaMood } from "./lola";
+import { SpeechBubble } from "./speech-bubble";
 
 export const ASK_LOLA_DIALOG = "ask-lola";
 
@@ -38,9 +39,11 @@ const EXAMPLES = ["είμαι έτοιμος", "δεν καταλαβαίνω", 
 
 /** Lola's words on the left, with her face. */
 const Bubble = ({ mood, children }: { mood: LolaMood; children: React.ReactNode }) => (
-  <div className="flex items-start gap-3">
+  <div className="flex items-start gap-4">
     <Lola mood={mood} className="size-14 shrink-0" />
-    <div className="min-w-0 flex-1 space-y-3 rounded-3xl rounded-tl-md border-2 border-border bg-card px-4 py-3 shadow-[0_3px_0_0_var(--border)]">{children}</div>
+    <SpeechBubble tail="left" className="min-w-0 flex-1 space-y-3">
+      {children}
+    </SpeechBubble>
   </div>
 );
 
@@ -101,7 +104,7 @@ const Reply = ({ asked, onWordDetails }: { asked: Asked; onWordDetails: (word: s
             {local.words.map((item) => (
               <li key={item.id} className="flex flex-wrap items-center gap-x-2 gap-y-1">
                 <span className="font-es text-xl font-semibold">
-                  {item.emoji} {withArticle(item)}
+                  {withArticle(item)}
                 </span>
                 <span className="text-muted-foreground">{item.el}</span>
                 <Badge variant="secondary">Κεφ. {item.unitId}</Badge>

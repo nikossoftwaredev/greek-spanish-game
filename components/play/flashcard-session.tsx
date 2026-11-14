@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { CONFIRM_DIALOG } from "@/components/confirm-dialog";
-import { LolaStanding } from "@/components/mascot/lola-companion";
+import { LolaFooterStage } from "@/components/mascot/lola-companion";
 import { TappableText } from "@/components/tappable-text";
 import { Button } from "@/components/ui/button";
 import { type FlatVocab, withArticle } from "@/lib/content/selectors";
@@ -202,11 +202,6 @@ const FlashcardRound = ({ config, title, exitHref, exitLabel, onAgain }: Flashca
                 )}
               >
                 <div className="col-start-1 row-start-1 flex flex-col items-center justify-center gap-4 rounded-[2rem] border-2 border-border bg-card p-6 text-center shadow-[0_6px_0_0_var(--border)] [backface-visibility:hidden]">
-                  {card.emoji && (
-                    <span className="text-7xl" aria-hidden>
-                      {card.emoji}
-                    </span>
-                  )}
                   {frontIsSpanish && <p className="font-es text-4xl leading-tight font-semibold sm:text-5xl">{withArticle(card)}</p>}
                   {!frontIsSpanish && <p className="text-3xl leading-tight font-extrabold">{card.el}</p>}
                   <p className="text-sm text-muted-foreground">Πάτησε για να γυρίσει η κάρτα</p>
@@ -232,8 +227,7 @@ const FlashcardRound = ({ config, title, exitHref, exitLabel, onAgain }: Flashca
       </main>
 
       <footer className="safe-bottom fixed inset-x-0 bottom-0 z-30 border-t-2 border-border bg-background">
-        <LolaStanding mood="teaching" animateKey={index} />
-        <div className="mx-auto w-full max-w-2xl px-4 py-4">
+        <LolaFooterStage mood="teaching" animateKey={index}>
           {!flipped && (
             <Button type="button" variant="chunky" size="xl" className="w-full" onClick={handleFlip}>
               Δείξε την απάντηση
@@ -258,7 +252,7 @@ const FlashcardRound = ({ config, title, exitHref, exitLabel, onAgain }: Flashca
               </div>
             </div>
           )}
-        </div>
+        </LolaFooterStage>
       </footer>
     </div>
   );
