@@ -1,4 +1,4 @@
-import { BookOpen, Layers, PencilLine, Puzzle, Repeat2, Sparkles } from "lucide-react";
+import { BookOpen, Languages, Layers, PencilLine, Puzzle, Repeat2, Shuffle, Sparkles } from "lucide-react";
 import Link from "next/link";
 
 import { SourceLink } from "@/components/pdf/source-link";
@@ -25,6 +25,8 @@ export const UnitHero = ({ unit }: { unit: Unit }) => {
     { mode: "flashcards", label: "Φλας κάρτες", icon: Layers },
     { mode: "match", label: "Αντιστοίχιση", icon: Puzzle },
     { mode: "type", label: "Γράψε", icon: PencilLine },
+    { mode: "translate", label: "Μετάφραση", icon: Languages },
+    { mode: "scramble", label: "Γράμματα", icon: Shuffle },
     { mode: "verbs", label: "Ρήματα", icon: Repeat2 },
   ];
 

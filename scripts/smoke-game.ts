@@ -5,7 +5,7 @@ import { ALL_VOCAB } from "../lib/content/selectors";
 import { EVERY_LESSON } from "../lib/content/selectors";
 import { buildFlashcards, buildSession } from "../lib/game/builders";
 import { buildLessonSteps } from "../lib/game/lesson-steps";
-import { acceptedForms, matchAnswer } from "../lib/game/text";
+import { acceptedForms, greekForms, matchAnswer } from "../lib/game/text";
 import type { Exercise, SessionMode } from "../lib/game/types";
 import { askLocal } from "../lib/lola/ask";
 
@@ -14,7 +14,7 @@ import { askLocal } from "../lib/lola/ask";
  * answered. Run with `pnpm smoke:game`.
  */
 
-const MODES: SessionMode[] = ["mix", "match", "type", "verbs"];
+const MODES: SessionMode[] = ["mix", "match", "type", "translate", "scramble", "verbs"];
 const learner = { cards: {}, drillStats: {}, verbStats: {}, taughtLessons: ['1:genero', '1:pronombres'] };
 const problems: string[] = [];
 let exercises = 0;
@@ -117,6 +117,13 @@ for (const phrase of PHRASEBOOK) {
 if (askLocal("πως ειναι το «ειμαι ετοιμος»").phrase?.es[0] !== "Estoy listo.") problems.push("Ask Lola: the question around a phrase is not ignored");
 if (askLocal("πως ειναι το «ειμαι ετοιμος»").match !== "exact") problems.push("Ask Lola: a wrapped question should be an exact match");
 if (askLocal("τι σημαίνει tengo hambre").language !== "es") problems.push("Ask Lola: «τι σημαίνει ...» with a Spanish phrase should answer in the other direction");
+
+// The typed-Greek game needs a Greek answer for every word, and any alternative of it must be accepted.
+for (const item of ALL_VOCAB) {
+  const forms = greekForms(item.el);
+  if (forms.length === 0) problems.push(`No Greek answer for ${item.id} (${item.el})`);
+  for (const form of forms) if (matchAnswer({ typed: form, accepted: forms }) !== "exact") problems.push(`Greek form "${form}" of ${item.id} does not match itself`);
+}
 
 // Every vocabulary item must produce at least one accepted typed form.
 for (const item of ALL_VOCAB) if (acceptedForms(item).length === 0) problems.push(`No accepted forms for ${item.id}`);

@@ -54,6 +54,8 @@ export interface TypeExercise extends BaseExercise {
   promptText: string;
   promptLang: Lang;
   promptHintEl?: string;
+  /** The language of the typed answer: Spanish unless stated. */
+  answerLang?: Lang;
   /** Every correct typed answer. The first one is displayed as the solution. */
   accepted: string[];
   /** When set, the sentence is shown with a gap: `before` [input] `after`. */
@@ -75,6 +77,10 @@ export interface MatchExercise extends BaseExercise {
 export interface OrderExercise extends BaseExercise {
   kind: "order";
   promptEl: string;
+  /** Overrides the default instruction ("build the sentence"). */
+  instructionEl?: string;
+  /** The tiles are single letters: the word is built without spaces. */
+  letters?: boolean;
   /** Shuffled tiles, including distractors. */
   tiles: string[];
   solution: string[];
@@ -95,7 +101,7 @@ export interface ExerciseResult {
   missedVocabIds?: string[];
 }
 
-export type SessionMode = "mix" | "flashcards" | "match" | "type" | "verbs" | "grammar" | "review" | "learn";
+export type SessionMode = "mix" | "flashcards" | "match" | "type" | "verbs" | "grammar" | "review" | "learn" | "translate" | "scramble";
 
 export interface SessionConfig {
   mode: SessionMode;

@@ -5,6 +5,8 @@ export const MODE_TITLES: Record<SessionMode, string> = {
   flashcards: "Φλας κάρτες",
   match: "Αντιστοίχιση",
   type: "Γράψε τη λέξη",
+  translate: "Μετάφραση",
+  scramble: "Φτιάξε τη λέξη",
   verbs: "Κλίση ρημάτων",
   grammar: "Γραμματική",
   review: "Επανάληψη",

@@ -1,6 +1,6 @@
 "use client";
 
-import { Layers, PencilLine, Puzzle, Repeat2, Sparkles, SpellCheck } from "lucide-react";
+import { Languages, Layers, PencilLine, Puzzle, Repeat2, Shuffle, Sparkles, SpellCheck } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -16,6 +16,8 @@ const GAMES: { mode: string; title: string; text: string; icon: typeof Sparkles;
   { mode: "flashcards", title: "Φλας κάρτες", text: "Επανάληψη με έξυπνο χρονοδιάγραμμα (FSRS): ξαναβλέπεις κάθε λέξη ακριβώς πριν τη ξεχάσεις.", icon: Layers, tone: "bg-sky text-white" },
   { mode: "match", title: "Αντιστοίχιση", text: "Ταίριαξε τις ισπανικές λέξεις με τα ελληνικά τους, όσο πιο γρήγορα μπορείς.", icon: Puzzle, tone: "bg-success text-white" },
   { mode: "type", title: "Γράψε τη λέξη", text: "Δες τη σημασία και γράψε τη λέξη στα ισπανικά, με τόνους και ñ.", icon: PencilLine, tone: "bg-sun text-foreground" },
+  { mode: "translate", title: "Μετάφραση", text: "Σε ρωτάω «πώς λέγεται το τάδε στα ισπανικά;» και το γράφεις. Άλλες φορές σου δίνω το ισπανικό και γράφεις τα ελληνικά.", icon: Languages, tone: "bg-destructive text-white" },
+  { mode: "scramble", title: "Φτιάξε τη λέξη", text: "Ανακατεμένα γράμματα: φτιάξε τη σωστή ισπανική λέξη από τη σημασία της, με τόνους και ñ.", icon: Shuffle, tone: "bg-sky text-white" },
   { mode: "verbs", title: "Κλίση ρημάτων", text: "Κλίνε τα ρήματα του κεφαλαίου σε όλα τα πρόσωπα του ενεστώτα.", icon: Repeat2, tone: "bg-foreground text-background" },
   { mode: "grammar", title: "Γραμματική", text: "Τίκαρε όσα έχετε διδαχθεί και κάνε εξάσκηση με τις ασκήσεις αυτών των θεμάτων.", icon: SpellCheck, tone: "bg-sky text-white", href: "/grammar" },
 ];

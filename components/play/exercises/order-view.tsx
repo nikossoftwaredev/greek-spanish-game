@@ -19,16 +19,18 @@ export const OrderView = ({ exercise, locked, result, onReady, onComplete }: Exe
   const orders = [exercise.solution, ...(exercise.alternatives ?? [])];
   const longest = Math.max(...orders.map((order) => order.length));
 
-  const builtText = (next: number[]): string => normalize(next.map((index) => exercise.tiles[index]).join(" "));
+  const joiner = exercise.letters ? "" : " ";
+
+  const builtText = (next: number[]): string => normalize(next.map((index) => exercise.tiles[index]).join(joiner));
 
   const evaluate = (next: number[]) => {
     const built = builtText(next);
-    const correct = orders.some((order) => normalize(order.join(" ")) === built);
-    return { correct, solution: exercise.solution.join(" ") };
+    const correct = orders.some((order) => normalize(order.join(joiner)) === built);
+    return { correct, solution: exercise.solution.join(joiner) };
   };
 
   /** A sentence is finished when it equals an accepted order, or when it is as long as the longest one. */
-  const isFinished = (next: number[]): boolean => next.length >= longest || orders.some((order) => normalize(order.join(" ")) === builtText(next));
+  const isFinished = (next: number[]): boolean => next.length >= longest || orders.some((order) => normalize(order.join(joiner)) === builtText(next));
 
   const update = (next: number[]) => {
     const adding = next.length > picked.length;
@@ -65,7 +67,7 @@ export const OrderView = ({ exercise, locked, result, onReady, onComplete }: Exe
     <div className="flex flex-1 flex-col gap-6">
       <PromptHeader
         source={exercise.source}
-        instruction="Φτιάξε την πρόταση στα ισπανικά"
+        instruction={exercise.instructionEl ?? "Φτιάξε την πρόταση στα ισπανικά"}
         prompt={<span className="text-2xl leading-snug font-extrabold sm:text-3xl">{exercise.promptEl}</span>}
       />
 
@@ -120,8 +122,8 @@ export const OrderView = ({ exercise, locked, result, onReady, onComplete }: Exe
 
       {locked && result && !result.correct && (
         <div className="space-y-1 rounded-xl bg-muted px-3 py-2 text-sm">
-          <p className="text-xs font-bold text-muted-foreground uppercase">Σωστή πρόταση</p>
-          <TappableText text={exercise.solution.join(" ")} className="font-es text-xl font-semibold" />
+          <p className="text-xs font-bold text-muted-foreground uppercase">{exercise.letters ? "Σωστή λέξη" : "Σωστή πρόταση"}</p>
+          <TappableText text={exercise.solution.join(joiner)} className="font-es text-xl font-semibold" />
           {exercise.explainEl && <p>{exercise.explainEl}</p>}
         </div>
       )}

@@ -39,7 +39,7 @@ export const solutionOf = (exercise: Exercise): string => {
     case "type":
       return exercise.accepted[0] ?? "";
     case "order":
-      return exercise.solution.join(" ");
+      return exercise.solution.join(exercise.letters ? "" : " ");
     case "match":
       return "";
   }

@@ -1,6 +1,7 @@
 import type { VocabItem } from "@/types/content";
 
-const ARTICLES = new Set(["el", "la", "los", "las", "un", "una", "unos", "unas"]);
+/** Spanish articles, and the Greek ones too, so "ο μάγειρας" is accepted for "μάγειρας". */
+const ARTICLES = new Set(["el", "la", "los", "las", "un", "una", "unos", "unas", "ο", "η", "το", "οι", "τα", "ένας", "ενας", "μια", "μία", "ένα", "ενα"]);
 const TILDE_N = "\u0001";
 
 /** Lowercase, trimmed, single spaces, without leading/trailing punctuation marks. */
@@ -56,6 +57,16 @@ const expandSlashToken = (token: string): string[] => {
   const baseEndsWithVowel = /[oa]$/.test(base);
   const feminine = baseEndsWithVowel ? `${base.slice(0, -1)}${suffix}` : `${base}${suffix}`;
   return [base, feminine];
+};
+
+/** Every Greek string that counts as correct for a meaning like "θερμός / ζεστός" or "παππούδες (παππούς και γιαγιά)". */
+export const greekForms = (el: string): string[] => {
+  const forms = el
+    .replace(/\(.*?\)/g, "")
+    .split(/\s+\/\s+|\s*,\s*/)
+    .map((form) => form.replace(/[….]+$/u, "").trim())
+    .filter(Boolean);
+  return [...new Set(forms)];
 };
 
 /** Every Spanish string that counts as correct when the learner types `item`. */

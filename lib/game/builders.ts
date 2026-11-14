@@ -1,6 +1,6 @@
-import { EVERY_LESSON, type FlatLesson, type FlatVocab, lessonByKey, lessonsForUnits, verbsForUnits, vocabForUnits, withArticle } from "@/lib/content/selectors";
+import { ALL_VOCAB, EVERY_LESSON, type FlatLesson, type FlatVocab, lessonByKey, lessonsForUnits, verbsForUnits, vocabForUnits, withArticle } from "@/lib/content/selectors";
 import { lessonSource, matchSource, verbSource, vocabSource } from "@/lib/game/sources";
-import { acceptedForms, sample, shuffle } from "@/lib/game/text";
+import { acceptedForms, greekForms, sample, shuffle } from "@/lib/game/text";
 import type {
   ChoiceExercise,
   Exercise,
@@ -98,6 +98,9 @@ const elToEsChoice = ({ item, pool }: { item: FlatVocab; pool: FlatVocab[] }): C
   example: item.example,
 });
 
+/** Other words of the book with the very same Greek meaning: typing any of them is also right. */
+const sameMeaning = (item: FlatVocab): FlatVocab[] => ALL_VOCAB.filter((other) => other.id !== item.id && other.el === item.el);
+
 const elToEsType = (item: FlatVocab): TypeExercise => ({
   ...choiceBase(item),
   id: nextId("type"),
@@ -105,10 +108,48 @@ const elToEsType = (item: FlatVocab): TypeExercise => ({
   instructionEl: "Γράψε το στα ισπανικά",
   promptText: item.el,
   promptLang: "el",
-  accepted: acceptedForms(item),
+  accepted: unique([...acceptedForms(item), ...sameMeaning(item).flatMap(acceptedForms)]),
   explainEl: item.noteEl,
   example: item.example,
 });
+
+/** The other way round: the Spanish is shown, the learner types what it means in Greek. */
+const esToElType = (item: FlatVocab): TypeExercise => ({
+  ...choiceBase(item),
+  id: nextId("type-el"),
+  kind: "type",
+  instructionEl: "Γράψε τι σημαίνει στα ελληνικά",
+  promptText: withArticle(item),
+  promptLang: "es",
+  answerLang: "el",
+  accepted: greekForms(item.el),
+  explainEl: item.noteEl,
+  example: item.example,
+});
+
+/** The word as it would be built from letters: before any "/", one piece, 3 to 10 letters. */
+const scrambleBase = (item: FlatVocab): string => item.es.split("/")[0].trim().normalize("NFC");
+
+const canScramble = (item: FlatVocab): boolean => /^\p{L}{3,10}$/u.test(scrambleBase(item));
+
+/** The Greek meaning is shown, the letters of the Spanish word are mixed up. */
+const scrambleWord = (item: FlatVocab): OrderExercise => {
+  const word = scrambleBase(item);
+  const solution = [...word];
+  let tiles = shuffle(solution);
+  for (let attempt = 0; attempt < 6 && tiles.join("") === word; attempt++) tiles = shuffle(solution);
+  return {
+    ...choiceBase(item),
+    id: nextId("scramble"),
+    kind: "order",
+    instructionEl: "Φτιάξε τη λέξη στα ισπανικά με αυτά τα γράμματα",
+    letters: true,
+    promptEl: item.el,
+    tiles,
+    solution,
+    explainEl: item.noteEl,
+  };
+};
 
 const matchRound = ({ items }: { items: FlatVocab[] }): MatchExercise => ({
   id: nextId("match"),
@@ -289,6 +330,22 @@ const buildType = ({ config, learner, size = 12 }: BuildParams): Exercise[] => {
     .map((item) => elToEsType(item));
 };
 
+/** Questions in both directions: "how do you say X in Spanish?" and "what does Y mean?", all typed. */
+const buildTranslate = ({ config, learner, size = 12 }: BuildParams): Exercise[] => {
+  const pool = vocabForUnits(config.unitIds, config.pages).filter((item) => item.es.length <= 28 && (greekForms(item.el)[0]?.length ?? 99) <= 28);
+  const offset = Math.random() < 0.5 ? 0 : 1;
+  return prioritize({ pool, cards: learner.cards })
+    .slice(0, size)
+    .map((item, index) => ((index + offset) % 2 === 0 ? elToEsType(item) : esToElType(item)));
+};
+
+const buildScramble = ({ config, learner, size = 10 }: BuildParams): Exercise[] => {
+  const pool = vocabForUnits(config.unitIds, config.pages).filter(canScramble);
+  return prioritize({ pool, cards: learner.cards })
+    .slice(0, size)
+    .map((item) => scrambleWord(item));
+};
+
 const buildVerbs = ({ config, learner, size = 12 }: BuildParams): Exercise[] => {
   const verbs = verbsForUnits(config.unitIds);
   if (verbs.length === 0) return [];
@@ -354,6 +411,10 @@ export const buildSession = (params: BuildParams): Exercise[] => {
       return buildMatch(params);
     case "type":
       return buildType(params);
+    case "translate":
+      return buildTranslate(params);
+    case "scramble":
+      return buildScramble(params);
     case "verbs":
       return buildVerbs(params);
     case "grammar":

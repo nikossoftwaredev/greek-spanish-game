@@ -77,22 +77,28 @@ export const TypeView = ({ exercise, locked, result, onReady, onComplete }: Exer
   else if (exercise.promptText)
     promptNode = <span className="text-2xl leading-snug font-extrabold sm:text-3xl">{exercise.promptText}</span>;
 
+  const answerIsGreek = exercise.answerLang === "el";
+  let placeholder = "Γράψε στα ισπανικά";
+  if (exercise.gap) placeholder = "…";
+  else if (answerIsGreek) placeholder = "Γράψε στα ελληνικά";
+
   const field = (
     <input
       ref={inputRef}
       value={value}
       disabled={locked}
       onChange={(event) => handleChange(event.target.value)}
-      lang="es"
+      lang={exercise.answerLang ?? "es"}
       autoCapitalize="none"
       autoCorrect="off"
       autoComplete="off"
       spellCheck={false}
       aria-label="Η απάντησή σου"
-      placeholder={exercise.gap ? "…" : "Γράψε στα ισπανικά"}
+      placeholder={placeholder}
       size={exercise.gap ? Math.max(6, Math.min(16, (exercise.accepted[0]?.length ?? 6) + 2)) : undefined}
       className={cn(
-        "min-w-0 bg-transparent px-1 font-es text-2xl font-semibold outline-none placeholder:font-sans placeholder:text-base placeholder:font-normal placeholder:text-muted-foreground/70",
+        "min-w-0 bg-transparent px-1 text-2xl outline-none placeholder:font-sans placeholder:text-base placeholder:font-normal placeholder:text-muted-foreground/70",
+        answerIsGreek ? "font-bold" : "font-es font-semibold",
         !exercise.gap && "w-full",
       )}
     />
@@ -119,22 +125,24 @@ export const TypeView = ({ exercise, locked, result, onReady, onComplete }: Exer
         <div className={cn("flex rounded-2xl border-2 px-3 py-3 shadow-[0_3px_0_0_var(--border)] transition-all", stateClass())}>{field}</div>
       )}
 
-      <div className="flex flex-wrap gap-1.5" aria-label="Ειδικοί χαρακτήρες">
-        {SPECIAL_CHARS.map((char) => (
-          <Button
-            key={char}
-            type="button"
-            variant="chunky-outline"
-            size="icon"
-            disabled={locked}
-            onMouseDown={(event) => event.preventDefault()}
-            onClick={() => insertChar(char)}
-            className="font-es text-lg"
-          >
-            {char}
-          </Button>
-        ))}
-      </div>
+      {!answerIsGreek && (
+        <div className="flex flex-wrap gap-1.5" aria-label="Ειδικοί χαρακτήρες">
+          {SPECIAL_CHARS.map((char) => (
+            <Button
+              key={char}
+              type="button"
+              variant="chunky-outline"
+              size="icon"
+              disabled={locked}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => insertChar(char)}
+              className="font-es text-lg"
+            >
+              {char}
+            </Button>
+          ))}
+        </div>
+      )}
 
       {locked && result?.accentSlip && (
         <p className="rounded-xl bg-sun/25 px-3 py-2 text-sm font-bold">
