@@ -40,6 +40,9 @@ export const PlayClient = ({ mode }: { mode: SessionMode }) => {
   const lesson = exercise ? `gu:${exercise.split(".")[0]}` : (params.get("lesson") ?? undefined);
   const homeworkId = params.get("hw") ?? undefined;
   const saved = params.get("saved") === "1";
+  const focus = params.get("focus") === "1";
+  const chapterParam = Number(params.get("ch"));
+  const chapter = Number.isInteger(chapterParam) && chapterParam >= 0 ? chapterParam : undefined;
   const taught = params.get("taught") === "1";
   const pagesParam = params.get("pages");
   const lessonsParam = params.get("lessons");
@@ -57,8 +60,8 @@ export const PlayClient = ({ mode }: { mode: SessionMode }) => {
       .map(Number)
       .filter((page) => Number.isInteger(page));
     const useTaught = !fromUrl && !lesson && !lessons;
-    return { mode, unitIds, pages, lesson, exercise, lessons, homeworkId, saved, taught, useTaught };
-  }, [mode, unitsParam, pagesParam, lesson, exercise, lessonsParam, homeworkId, saved, taught, classUnit]);
+    return { mode, unitIds, pages, lesson, exercise, lessons, homeworkId, saved, taught, useTaught, chapter, focus };
+  }, [mode, unitsParam, pagesParam, lesson, exercise, lessonsParam, homeworkId, saved, taught, classUnit, chapter, focus]);
 
   if (!hydrated)
     return (
@@ -74,10 +77,10 @@ export const PlayClient = ({ mode }: { mode: SessionMode }) => {
   }
   const exitLabel = exitHref === "/" ? "Αρχική" : "Πίσω";
 
-  if (mode === "learn") return <LessonPlayer lessonKey={lesson ?? ""} exitHref={exitHref} />;
+  if (mode === "learn") return <LessonPlayer key={params.toString()} lessonKey={lesson ?? ""} exitHref={exitHref} />;
 
   if (mode === "flashcards" || mode === "review")
-    return <FlashcardSession config={config} title={title} exitHref={exitHref} exitLabel={exitLabel} />;
+    return <FlashcardSession key={params.toString()} config={config} title={title} exitHref={exitHref} exitLabel={exitLabel} />;
 
-  return <SessionRunner config={config} title={title} exitHref={exitHref} exitLabel={exitLabel} />;
+  return <SessionRunner key={params.toString()} config={config} title={title} exitHref={exitHref} exitLabel={exitLabel} />;
 };

@@ -1,17 +1,21 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, ExternalLink, Loader2, Minus, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink, Loader2, Minus, MoveHorizontal, Plus } from "lucide-react";
 import type { PDFDocumentProxy } from "pdfjs-dist";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { clamp } from "@/lib/general/utils";
 import { PDF_BOOKS, type PdfBook } from "@/lib/pdf/books";
 import { getPdfBlob, getPdfDocument } from "@/lib/pdf/document";
 import { useDialogStore } from "@/lib/stores/dialog-store";
 import { usePdfStore } from "@/lib/stores/pdf-store";
 
 import { PdfBookLoader } from "./pdf-book-loader";
+import { alignToFocus, canvasPixelRatio, clampZoom, FIT_ZOOM, MAX_ZOOM, measureFocus, MIN_ZOOM, recallZoom, rememberZoom, stepZoom, type ZoomFocus } from "./pdf-zoom";
+import { usePdfGestures } from "./use-pdf-gestures";
 
 export const PDF_VIEWER_DIALOG = "pdf-viewer";
 
@@ -21,8 +25,22 @@ interface ViewerData {
   page: number;
 }
 
-const MIN_ZOOM = 0.6;
-const MAX_ZOOM = 3;
+interface ZoomView {
+  zoom: number;
+  /** Set by gestures and buttons: the page point that must stay where it was while the page grows or shrinks. */
+  focus: ZoomFocus | null;
+}
+
+/** The page the canvas currently holds, and its height relative to its width. */
+interface ShownPage {
+  page: number;
+  aspect: number;
+}
+
+/** The canvas is redrawn sharply this long after the zoom stops changing. Until then the browser stretches the old bitmap. */
+const RENDER_DEBOUNCE_MS = 160;
+const PAGE_PADDING = 8;
+const ZOOM_EPSILON = 1e-6;
 
 const ViewerBody = ({ book, startPage }: { book: PdfBook; startPage: number }) => {
   const checked = usePdfStore((state) => state.checked);
@@ -30,31 +48,69 @@ const ViewerBody = ({ book, startPage }: { book: PdfBook; startPage: number }) =
   const [doc, setDoc] = useState<PDFDocumentProxy | null | undefined>(undefined);
   const [page, setPage] = useState(startPage);
   const [jump, setJump] = useState(String(startPage));
-  const [zoom, setZoom] = useState(1);
+  const [view, setView] = useState<ZoomView>(() => ({ zoom: recallZoom(book), focus: null }));
+  const [renderZoom, setRenderZoom] = useState(view.zoom);
   const [width, setWidth] = useState(0);
-  const [renderedKey, setRenderedKey] = useState("");
+  const [shown, setShown] = useState<ShownPage | null>(null);
   const [failed, setFailed] = useState(false);
-  const container = useRef<HTMLDivElement>(null);
+  const [scroller, setScroller] = useState<HTMLDivElement | null>(null);
+  const pageBox = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
+  const zoomRef = useRef(view.zoom);
 
   const total = doc?.numPages ?? 0;
-  const key = `${page}:${zoom}:${width}`;
-  const rendering = Boolean(doc) && renderedKey !== key;
+  const { zoom } = view;
+  const hasShown = shown !== null;
+  const displayWidth = Math.round(width * zoom);
+  const displayHeight = shown ? Math.round(displayWidth * shown.aspect) : 0;
+  const loadingPage = doc !== null && !failed && (doc === undefined || shown?.page !== page);
 
   const goTo = (next: number) => {
     if (!doc) return;
-    const clamped = Math.min(Math.max(1, next), doc.numPages);
+    const clamped = clamp({ value: next, min: 1, max: doc.numPages });
     setPage(clamped);
     setJump(String(clamped));
+    setFailed(false);
+    scroller?.scrollTo({ top: 0 });
   };
 
-  const changeZoom = (delta: number) => setZoom((value) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Math.round((value + delta) * 10) / 10)));
+  /** Applies a new zoom synchronously, so the next gesture event measures the page as it is now. */
+  const applyZoom = useCallback(
+    (next: number, focus: ZoomFocus | null) => {
+      const clamped = clampZoom(next);
+      zoomRef.current = clamped;
+      rememberZoom({ book, zoom: clamped });
+      flushSync(() => setView({ zoom: clamped, focus }));
+    },
+    [book],
+  );
+
+  const measure = useCallback((x: number, y: number) => measureFocus({ target: pageBox.current, x, y }), []);
+
+  /** Buttons and keys zoom around the middle of what is on screen. */
+  const zoomTo = (next: number) => {
+    if (!scroller) return;
+    const rect = scroller.getBoundingClientRect();
+    applyZoom(next, measure(rect.left + scroller.clientWidth / 2, rect.top + scroller.clientHeight / 2));
+  };
+
+  const stepBy = (direction: 1 | -1) => zoomTo(stepZoom({ zoom: zoomRef.current, direction }));
 
   const handleOpenNative = async () => {
     const blob = await getPdfBlob(book);
     if (!blob) return;
     window.open(`${URL.createObjectURL(blob)}#page=${page}`, "_blank", "noopener");
   };
+
+  usePdfGestures({ scroller, zoomRef, onZoom: applyZoom, measure });
+
+  useLayoutEffect(() => {
+    if (view.focus && scroller && pageBox.current) alignToFocus({ scroller, target: pageBox.current, focus: view.focus });
+  }, [view, scroller]);
+
+  useLayoutEffect(() => {
+    if (hasShown && scroller) scroller.scrollTo({ left: (scroller.scrollWidth - scroller.clientWidth) / 2 });
+  }, [hasShown, scroller]);
 
   useEffect(() => {
     if (!loaded) return;
@@ -72,34 +128,43 @@ const ViewerBody = ({ book, startPage }: { book: PdfBook; startPage: number }) =
   }, [book, loaded]);
 
   useEffect(() => {
-    const element = container.current;
-    if (!element) return;
-    const observer = new ResizeObserver(() => setWidth(Math.round(element.clientWidth)));
-    observer.observe(element);
+    if (!scroller) return;
+    const observer = new ResizeObserver(() => setWidth(Math.round(scroller.clientWidth)));
+    observer.observe(scroller);
     return () => observer.disconnect();
-  }, [doc]);
+  }, [scroller]);
 
   useEffect(() => {
-    if (!doc || !width || !canvas.current) return;
+    const timer = window.setTimeout(() => setRenderZoom(zoom), RENDER_DEBOUNCE_MS);
+    return () => window.clearTimeout(timer);
+  }, [zoom]);
+
+  useEffect(() => {
     const target = canvas.current;
+    if (!doc || !width || !target) return;
     let isMounted = true;
     let task: { cancel: () => void } | undefined;
+    // Drawn off screen first and copied over in one go, so the page never flashes blank while it is redrawn.
+    const buffer = document.createElement("canvas");
 
     doc
-      .getPage(Math.min(Math.max(1, page), doc.numPages))
+      .getPage(clamp({ value: page, min: 1, max: doc.numPages }))
       .then(async (pdfPage) => {
         const base = pdfPage.getViewport({ scale: 1 });
-        const scale = (width / base.width) * zoom;
-        const ratio = window.devicePixelRatio || 1;
-        const viewport = pdfPage.getViewport({ scale: scale * ratio });
-        target.width = Math.floor(viewport.width);
-        target.height = Math.floor(viewport.height);
-        target.style.width = `${Math.floor(viewport.width / ratio)}px`;
-        target.style.height = `${Math.floor(viewport.height / ratio)}px`;
-        const render = pdfPage.render({ canvas: target, viewport });
+        const cssScale = (width / base.width) * renderZoom;
+        const ratio = canvasPixelRatio({ cssWidth: base.width * cssScale, cssHeight: base.height * cssScale });
+        const viewport = pdfPage.getViewport({ scale: cssScale * ratio });
+        buffer.width = Math.max(1, Math.floor(viewport.width));
+        buffer.height = Math.max(1, Math.floor(viewport.height));
+        const render = pdfPage.render({ canvas: buffer, viewport });
         task = render;
         await render.promise;
-        if (isMounted) setRenderedKey(`${page}:${zoom}:${width}`);
+        if (!isMounted) return;
+        target.width = buffer.width;
+        target.height = buffer.height;
+        target.getContext("2d")?.drawImage(buffer, 0, 0);
+        setShown({ page, aspect: base.height / base.width });
+        setFailed(false);
       })
       .catch((error: unknown) => {
         const name = (error as { name?: string } | null)?.name;
@@ -109,16 +174,19 @@ const ViewerBody = ({ book, startPage }: { book: PdfBook; startPage: number }) =
     return () => {
       isMounted = false;
       task?.cancel();
+      buffer.width = 0;
     };
-  }, [doc, page, zoom, width]);
+  }, [doc, page, width, renderZoom]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if ((event.target as HTMLElement | null)?.tagName === "INPUT") return;
+      const tag = (event.target as HTMLElement | null)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || event.ctrlKey || event.metaKey || event.altKey) return;
       if (event.key === "ArrowRight") goTo(page + 1);
       if (event.key === "ArrowLeft") goTo(page - 1);
-      if (event.key === "+" || event.key === "=") changeZoom(0.2);
-      if (event.key === "-") changeZoom(-0.2);
+      if (event.key === "+" || event.key === "=") stepBy(1);
+      if (event.key === "-" || event.key === "_") stepBy(-1);
+      if (event.key === "0") zoomTo(FIT_ZOOM);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -138,7 +206,7 @@ const ViewerBody = ({ book, startPage }: { book: PdfBook; startPage: number }) =
       <header className="flex flex-wrap items-center gap-2 border-b-2 border-border bg-card px-4 py-3 pr-12">
         <div className="min-w-0 flex-1">
           <DialogTitle className="truncate text-base font-extrabold">{PDF_BOOKS[book].shortTitle}</DialogTitle>
-          <DialogDescription className="text-xs">Η σελίδα από το δικό σου PDF, μόνο σε αυτή τη συσκευή</DialogDescription>
+          <DialogDescription className="sr-only text-xs sm:not-sr-only">Η σελίδα από το δικό σου PDF, μόνο σε αυτή τη συσκευή</DialogDescription>
         </div>
         <div className="flex items-center gap-1">
           <Button type="button" variant="chunky-outline" size="icon-sm" aria-label="Προηγούμενη σελίδα" disabled={!doc || page <= 1} onClick={() => goTo(page - 1)}>
@@ -164,33 +232,59 @@ const ViewerBody = ({ book, startPage }: { book: PdfBook; startPage: number }) =
             <ChevronRight />
           </Button>
         </div>
-        <div className="flex items-center gap-1">
-          <Button type="button" variant="ghost" size="icon-sm" aria-label="Σμίκρυνση" disabled={zoom <= MIN_ZOOM} onClick={() => changeZoom(-0.2)}>
-            <Minus />
-          </Button>
-          <span className="w-10 text-center text-xs font-bold tabular-nums">{Math.round(zoom * 100)}%</span>
-          <Button type="button" variant="ghost" size="icon-sm" aria-label="Μεγέθυνση" disabled={zoom >= MAX_ZOOM} onClick={() => changeZoom(0.2)}>
-            <Plus />
-          </Button>
-          <Button type="button" variant="ghost" size="icon-sm" aria-label="Άνοιγμα στον δικό σου πρόγραμμα προβολής PDF" title="Άνοιγμα σε νέα καρτέλα" onClick={handleOpenNative}>
-            <ExternalLink />
-          </Button>
-        </div>
       </header>
 
-      <div ref={container} className="relative min-h-0 flex-1 overflow-auto overscroll-contain bg-muted">
-        {(doc === undefined || rendering) && !failed && (
-          <div className="pointer-events-none absolute inset-x-0 top-4 z-10 flex justify-center" aria-live="polite">
+      <div className="relative min-h-0 flex-1 bg-muted">
+        <div
+          ref={setScroller}
+          className="size-full cursor-grab touch-none overflow-auto overscroll-contain select-none [scrollbar-gutter:stable] active:cursor-grabbing"
+        >
+          {doc && (
+            <div className="box-border" style={{ width: Math.max(width, displayWidth), height: displayHeight + PAGE_PADDING * 2, paddingTop: PAGE_PADDING }}>
+              <div ref={pageBox} className="mx-auto" style={{ width: displayWidth, height: displayHeight }}>
+                <canvas ref={canvas} className="block size-full bg-white shadow-md" />
+              </div>
+            </div>
+          )}
+        </div>
+        {loadingPage && (
+          <div className="pointer-events-none absolute inset-x-0 top-4 flex justify-center" aria-live="polite">
             <span className="flex items-center gap-2 rounded-full bg-card px-3 py-1.5 text-sm font-bold shadow-md">
               <Loader2 className="size-4 animate-spin" aria-hidden /> {doc === undefined ? "Ανοίγω το βιβλίο…" : "Φορτώνει η σελίδα…"}
             </span>
           </div>
         )}
         {(failed || doc === null) && (
-          <p className="p-6 text-center text-sm text-destructive">Δεν μπόρεσα να ανοίξω αυτή τη σελίδα. Δοκίμασε να φορτώσεις ξανά το βιβλίο από την Πρόοδο.</p>
+          <p className="pointer-events-none absolute inset-x-0 top-0 p-6 text-center text-sm text-destructive">
+            Δεν μπόρεσα να ανοίξω αυτή τη σελίδα. Δοκίμασε να φορτώσεις ξανά το βιβλίο από την Πρόοδο.
+          </p>
         )}
-        {doc && <canvas ref={canvas} className="mx-auto block bg-white shadow-md" />}
       </div>
+
+      <footer className="flex items-center justify-center gap-2 border-t-2 border-border bg-card px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+        <Button type="button" variant="chunky-outline" size="icon-lg" aria-label="Σμίκρυνση" disabled={zoom <= MIN_ZOOM + ZOOM_EPSILON} onClick={() => stepBy(-1)}>
+          <Minus />
+        </Button>
+        <Button
+          type="button"
+          variant="chunky-outline"
+          size="lg"
+          className="w-20 tabular-nums"
+          aria-label={`Μεγέθυνση ${Math.round(zoom * 100)}%, πάτα για να χωράει στο πλάτος`}
+          onClick={() => zoomTo(FIT_ZOOM)}
+        >
+          {Math.round(zoom * 100)}%
+        </Button>
+        <Button type="button" variant="chunky-outline" size="icon-lg" aria-label="Μεγέθυνση" disabled={zoom >= MAX_ZOOM - ZOOM_EPSILON} onClick={() => stepBy(1)}>
+          <Plus />
+        </Button>
+        <Button type="button" variant="chunky-outline" size="icon-lg" aria-label="Προσαρμογή στο πλάτος" title="Προσαρμογή στο πλάτος" disabled={Math.abs(zoom - FIT_ZOOM) < ZOOM_EPSILON} onClick={() => zoomTo(FIT_ZOOM)}>
+          <MoveHorizontal />
+        </Button>
+        <Button type="button" variant="ghost" size="icon-lg" aria-label="Άνοιγμα στον δικό σου πρόγραμμα προβολής PDF" title="Άνοιγμα σε νέα καρτέλα" onClick={handleOpenNative}>
+          <ExternalLink />
+        </Button>
+      </footer>
     </div>
   );
 };
@@ -207,7 +301,14 @@ export const PdfViewerDialog = () => {
         if (!isOpen) closeDialog(PDF_VIEWER_DIALOG);
       }}
     >
-      <DialogContent className="flex h-[94svh] w-[calc(100vw-1rem)] max-w-none flex-col gap-0 overflow-hidden p-0 sm:max-w-4xl">
+      <DialogContent
+        className="flex h-[94svh] w-[calc(100vw-1rem)] max-w-none flex-col gap-0 overflow-hidden p-0 sm:max-w-4xl"
+        onOpenAutoFocus={(event) => {
+          // The page-number field would take focus and swallow the zoom and page keys, so the dialog itself takes it.
+          event.preventDefault();
+          (event.currentTarget as HTMLElement | null)?.focus();
+        }}
+      >
         {data && <ViewerBody key={`${data.book}:${data.page}`} book={data.book} startPage={data.page} />}
       </DialogContent>
     </Dialog>

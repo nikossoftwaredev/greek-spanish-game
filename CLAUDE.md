@@ -57,9 +57,10 @@ app/layout.tsx          # Root: fonts (Alegreya for Spanish, Manrope for UI), pr
 app/(main)/             # Shell with header + bottom nav: home, units, practice, homework, verbs, progress
 app/play/[mode]/        # Full-screen game sessions (no shell)
 app/globals.css         # All tokens, keyframes, the .font-es utility
-components/             # app-shell/ home/ unit/ play/ learn/ (step-by-step lessons) mascot/ (Lola) homework/ progress/ verbs/ grammar/ (checklist) gramatica/ pdf/ practice/ + ui/ (shadcn ONLY)
+components/             # app-shell/ (install button) home/ unit/ play/ (PlayShell: locked top and bottom bars) learn/ (step-by-step lessons) mascot/ (the floating Lola) homework/ progress/ verbs/ grammar/ (checklist) gramatica/ pdf/ practice/ + ui/ (shadcn ONLY)
 content/                # units/unit-0..9.ts (+ unit-N-pages.ts), verbs.ts, gramatica/ (107 GuUnit files + practice/ = drills per numbered exercise), gramatica-de-uso.ts (how the books line up)
-lib/game/               # text.ts (answer matching), builders.ts (exercise generators), lesson-steps.ts (step-by-step lessons), mastery.ts
+lib/game/               # text.ts (answer matching), builders.ts (exercise generators), lesson-steps.ts (step-by-step lessons), progress.ts (chapter progress and the next step), mastery.ts
+lib/sound.ts, lib/voice.ts, lib/pwa.ts  # the right-answer sound, Lola's voice (only with a Spanish voice), install prompt
 lib/mascot/             # Lola's lines (praise, scolding, verdicts)
 lib/lola/               # Ask Lola: local phrase search + MyMemory translation (content/phrasebook.ts holds the phrases)
 lib/srs/fsrs.ts         # FSRS wrapper and mastery levels

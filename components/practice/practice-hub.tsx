@@ -1,13 +1,14 @@
 "use client";
 
-import { Languages, Layers, PencilLine, Puzzle, Repeat2, Shuffle, Sparkles, SpellCheck } from "lucide-react";
+import { BookOpenCheck, Dumbbell, Languages, Layers, PencilLine, Puzzle, Repeat2, Shuffle, Sparkles, SpellCheck } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { UNITS } from "@/content";
+import { GU_GROUPS } from "@/content/gramatica-de-uso";
 import { useHydrated } from "@/hooks/use-hydrated";
-import { onUnitColor } from "@/lib/content/selectors";
+import { guKey, onUnitColor } from "@/lib/content/selectors";
 import { cn } from "@/lib/general/utils";
 import { useProgressStore } from "@/lib/stores/progress-store";
 
@@ -26,6 +27,8 @@ export const PracticeHub = () => {
   const hydrated = useHydrated();
   const classUnit = useProgressStore((state) => state.classUnit);
   const [custom, setCustom] = useState<number[] | null>(null);
+  const [guSelected, setGuSelected] = useState<number[]>([0]);
+  const guKeys = guSelected.flatMap((index) => Array.from({ length: GU_GROUPS[index].to - GU_GROUPS[index].from + 1 }, (_, offset) => guKey(GU_GROUPS[index].from + offset)));
 
   const selected = custom ?? UNITS.filter((unit) => unit.id <= classUnit).map((unit) => unit.id);
   const unitsQuery = selected.join(",");
@@ -77,6 +80,46 @@ export const PracticeHub = () => {
           })}
         </div>
         {hydrated && selected.length === 0 && <p className="text-sm font-bold text-destructive">Διάλεξε τουλάχιστον ένα κεφάλαιο.</p>}
+      </section>
+
+      <section className="space-y-3 rounded-3xl border-2 border-border bg-card p-5 shadow-[0_4px_0_0_var(--border)]" aria-label="Gramática de uso">
+        <div className="flex items-center gap-3">
+          <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-sky text-white shadow-[0_3px_0_0_rgb(0_0_0/0.2)]">
+            <BookOpenCheck className="size-7" aria-hidden />
+          </span>
+          <div>
+            <h2 className="text-xl font-extrabold">Ασκήσεις από τη Gramática de uso</h2>
+            <p className="text-sm text-muted-foreground">Διάλεξε μέρη του βιβλίου και παίξε ασκήσεις γραμματικής, με τις πιο αδύναμες πρώτες.</p>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {GU_GROUPS.map((group, index) => {
+            const active = guSelected.includes(index);
+            return (
+              <button
+                key={group.label}
+                type="button"
+                aria-pressed={active}
+                onClick={() => setGuSelected((current) => (current.includes(index) ? current.filter((value) => value !== index) : [...current, index]))}
+                className={cn(
+                  "cursor-pointer rounded-2xl border-2 px-3 py-2 text-sm font-bold transition-all active:translate-y-0.5",
+                  active ? "border-transparent bg-sky text-white shadow-[0_3px_0_0_rgb(0_0_0/0.25)]" : "border-border bg-card text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {group.label}
+              </button>
+            );
+          })}
+        </div>
+        <Button asChild={guKeys.length > 0} variant="chunky" size="xl" disabled={guKeys.length === 0} className="w-full sm:w-auto">
+          {guKeys.length > 0 ? (
+            <Link href={`/play/grammar?lessons=${guKeys.join(",")}&back=%2Fpractice`}>
+              <Dumbbell /> Παίξε ασκήσεις ({guKeys.length} ενότητες)
+            </Link>
+          ) : (
+            <span>Διάλεξε μέρος του βιβλίου</span>
+          )}
+        </Button>
       </section>
 
       <section className="grid gap-4 sm:grid-cols-2" aria-label="Είδη παιχνιδιών">

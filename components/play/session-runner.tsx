@@ -7,15 +7,18 @@ import { useCallback, useRef, useState } from "react";
 import { CONFIRM_DIALOG } from "@/components/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { buildSession } from "@/lib/game/builders";
+import { chapterOf } from "@/lib/game/progress";
 import { summarizeSources } from "@/lib/game/sources";
 import type { Exercise, ExerciseResult, SessionConfig } from "@/lib/game/types";
 import { finishExercise } from "@/lib/homework/finish-exercise";
+import { playCorrect } from "@/lib/sound";
 import type { CardRating } from "@/lib/srs/fsrs";
 import { useDialogStore } from "@/lib/stores/dialog-store";
 import { useProgressStore } from "@/lib/stores/progress-store";
 
 import type { Evaluator } from "./exercise-types";
 import { ExerciseView, solutionOf } from "./exercise-view";
+import { PlayFooter, PlayShell } from "./play-shell";
 import { SessionFooter } from "./session-footer";
 import { SessionSummary } from "./session-summary";
 import { useEnterKey } from "./use-enter-key";
@@ -80,6 +83,7 @@ const SessionRound = ({ config, title, exitHref, exitLabel, onAgain }: SessionRo
   const record = ({ item, outcome }: { item: QueueItem; outcome: ExerciseResult }) => {
     const store = useProgressStore.getState();
     const { exercise, retry } = item;
+    if (outcome.correct) playCorrect();
 
     if (exercise.kind === "match") {
       exercise.pairs.forEach((pair) =>
@@ -162,6 +166,7 @@ const SessionRound = ({ config, title, exitHref, exitLabel, onAgain }: SessionRo
         exitHref={exitHref}
         exitLabel={exitLabel}
         sources={summarizeSources(queue.map((item) => item.exercise.source))}
+        chapter={chapterOf(config)}
         onAgain={onAgain}
       />
     );
@@ -181,30 +186,31 @@ const SessionRound = ({ config, title, exitHref, exitLabel, onAgain }: SessionRo
     );
 
   return (
-    <div className="flex min-h-svh flex-col">
-      <header className="mx-auto flex w-full max-w-2xl items-center gap-3 px-4 pt-4">
-        <Button type="button" variant="ghost" size="icon" aria-label="Έξοδος" onClick={handleExit}>
-          <X />
-        </Button>
-        <div
-          role="progressbar"
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={Math.round(progress)}
-          className="h-4 flex-1 overflow-hidden rounded-full bg-muted"
-        >
-          <div className="h-full rounded-full bg-success transition-[width] duration-500 ease-out" style={{ width: `${Math.max(progress, 3)}%` }} />
-        </div>
-        <span className="min-w-12 text-right text-sm font-extrabold text-sun-edge tabular-nums">+{stats.xp}</span>
-      </header>
+    <PlayShell
+      header={
+        <>
+          <Button type="button" variant="ghost" size="icon" aria-label="Έξοδος" onClick={handleExit}>
+            <X />
+          </Button>
+          <div
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(progress)}
+            className="h-4 flex-1 overflow-hidden rounded-full bg-muted"
+          >
+            <div className="h-full rounded-full bg-success transition-[width] duration-500 ease-out" style={{ width: `${Math.max(progress, 3)}%` }} />
+          </div>
+          <span className="min-w-12 text-right text-sm font-extrabold text-sun-edge tabular-nums">+{stats.xp}</span>
+        </>
+      }
+    >
+      <div key={current.exercise.id} className="flex flex-1 flex-col motion-safe:animate-rise">
+        <ExerciseView exercise={current.exercise} locked={checked} result={result} onReady={handleReady} onComplete={applyResult} />
+      </div>
 
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 pt-8 pb-72">
-        <div key={current.exercise.id} className="flex flex-1 flex-col motion-safe:animate-rise">
-          <ExerciseView exercise={current.exercise} locked={checked} result={result} onReady={handleReady} onComplete={applyResult} />
-        </div>
-      </main>
-
-      <SessionFooter
+      <PlayFooter>
+        <SessionFooter
           exercise={current.exercise}
           result={result}
           canCheck={evaluator !== null}
@@ -213,8 +219,9 @@ const SessionRound = ({ config, title, exitHref, exitLabel, onAgain }: SessionRo
           onCheck={handleCheck}
           onSkip={handleSkip}
           onContinue={handleContinue}
-      />
-    </div>
+        />
+      </PlayFooter>
+    </PlayShell>
   );
 };
 

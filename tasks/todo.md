@@ -33,6 +33,14 @@ Goal: a static project (no database) to learn Spanish with games, split exactly 
 - [x] Numbered exercises of the Gramática de uso playable in the app: 9 agents tagged the 1,284 existing drills and added 873 original ones (2,157 total, every one of the 434 exercises has 4 to 6), 5 independent reviewers read all of them; `?ex=50.2` sessions, auto-tick, homework auto-completes; validate + smoke enforce it
 - [x] Step-by-step grammar lessons (`/play/learn`) for both books, with a rebuild-the-example check after each rule and a quiz
 - [x] Lola, an original SVG mascot (4 moods) cheering and scolding in the answer feedback and the end screens, with a setting to switch her off
+- [x] Two vocabulary games («Μετάφραση» both directions, «Φτιάξε τη λέξη» letter scramble)
+- [x] Guided chapter path: sticky vocabulary % and grammar % on chapter and lesson pages, the main buttons say where they lead, «Επόμενο» after every round until the chapter is done, flashcards re-ask missed words, lessons remember the step
+- [x] Practice hub section for the Gramática de uso (unit groups), Ask Lola chat redesign without ready-made phrases, easier PDF zoom (pinch, double tap, keys)
+- [x] `PlayShell`: locked top and bottom bars for games, lessons and flashcards (fixes the footer floating mid-screen on a real phone), install banner/button for mobile browsers
+- [x] One floating, draggable `LolaCompanion` (position remembered, bubble flips to the side with room and stays on screen, stands on top of the game footer), her lines go through `lola-store`
+- [x] Right-answer sound (Web Audio) and Lola's voice (free browser voice, only with a Spanish voice), both with settings and in the backup
+- [ ] Learner: put the Klett Anexo pages in `data/anexo/` so the Aula vocabulary can be replaced
+- [ ] Underlining the found text in the PDF: not possible for the scanned Aula PDF (images, no text layer); possible for the Gramática PDF (has a text layer) later
 - [ ] Learner: push to GitHub and import the repo in Vercel (no env vars needed)
 - [ ] `/audit` and `/site-qa` before sharing the URL widely (not run yet)
 
@@ -44,3 +52,10 @@ Goal: a static project (no database) to learn Spanish with games, split exactly 
 - Bugs found by driving it and fixed: serif font not applied (`@theme inline` variable), flag emoji as letters on Windows, twin words in match rounds (found by the smoke test), collapsed buttons on the summary screen, sessions opening with a typed conjugation instead of an easy question.
 - Gramática de uso: `pnpm validate:content` now checks 107 units, 1,284 drills; `pnpm smoke:game` builds 10,000+ exercises across both books. Overflow checked at 390 px on 12 pages (none).
 - Known limits: the book's own numbered exercises are not reproduced (copyright), only paraphrased; the Aula "Más ejercicios / Más gramática" pages are not in the PDF; /audit and /site-qa were not run; progress is per browser (use the backup file to move it); Wiktionary glosses are in English and the Greek machine translation is marked as such; Spanish voice quality depends on the voices installed on the device.
+
+## Review: floating Lola, sound, guided path (2026-11-16)
+
+- `pnpm tsc --noEmit`, `pnpm exec eslint .`, `pnpm validate:content` (10 units, 1,953 words, 540 drills, 53 verbs; 107 Gramática units, 2,157 drills), `pnpm smoke:game` (14,892 exercises) and `pnpm build` (no env vars) all pass.
+- Driven in the browser at 390 px and 1280 px: dragging Lola (lands where released, a drag does not open Ask Lola, a tap does), her position after navigation and reload (`lolaPosition` in `vamos:settings:v1`), the bubble flipping to the side with room in all four corners and staying inside the screen, her bubble above the game footer on wrong answers, lesson steps and the end screen, the right-answer sound (2 notes per right answer, 0 for wrong ones, 0 with the setting off), backup round trip with `wordResults` and `lessonProgress`, PDF zoom (all checks pass), install banner (Android, iPhone, desktop), the guided path end to end.
+- Bugs found by driving it: the default spot of Lola covered an answer option on game screens (now anchored above the footer), a drag stored a position one pointer step short (stale closure, now a ref), two test scripts targeted removed UI (four flashcard buttons, the old tappable Lola).
+- Known limits: the voice and the sound were verified through the code paths (headless Chrome has no Spanish voice and no speakers), so check them once on the real phone; the real-phone Safari behaviour of PDF zoom and the keyboard was not verified; `/audit` and `/site-qa` were not run; nothing is deployed yet.

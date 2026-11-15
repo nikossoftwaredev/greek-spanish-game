@@ -4,20 +4,10 @@ import { Languages, Lightbulb } from "lucide-react";
 import { useState } from "react";
 
 import { GrammarTable } from "@/components/grammar/grammar-table";
-import { SpeechBubble } from "@/components/mascot/speech-bubble";
 import { TappableText } from "@/components/tappable-text";
 import { Button } from "@/components/ui/button";
-import { lolaNudge } from "@/lib/mascot/lines";
 import { useSettingsStore } from "@/lib/stores/settings-store";
 import type { GrammarLesson, GrammarRule, GrammarTable as GrammarTableData } from "@/types/content";
-
-/** What Lola says: a speech bubble. She is standing on the footer below. */
-const Say = ({ children }: { children: React.ReactNode }) => (
-  <SpeechBubble tail="down-left" className="text-base leading-snug">
-    <p className="mb-0.5 text-xs font-extrabold tracking-wide text-primary uppercase">Λόλα</p>
-    {children}
-  </SpeechBubble>
-);
 
 export const IntroStep = ({ lesson, stepCount }: { lesson: GrammarLesson; stepCount: number }) => (
   <div className="space-y-6">
@@ -26,11 +16,7 @@ export const IntroStep = ({ lesson, stepCount }: { lesson: GrammarLesson; stepCo
       <h1 className="font-es text-4xl leading-tight font-bold">{lesson.titleEs}</h1>
       <p className="text-lg font-bold text-muted-foreground">{lesson.titleEl}</p>
     </div>
-    <Say>
-      <p className="font-bold">¡Hola! Είμαι η Λόλα και θα σε βοηθήσω.</p>
-      <p className="mt-1">{lesson.introEl}</p>
-      <p className="mt-2 text-sm text-muted-foreground">Πάτα πάνω μου όποτε θες να ρωτήσεις πώς λέγεται κάτι στα ισπανικά.</p>
-    </Say>
+    <p className="text-lg leading-relaxed">{lesson.introEl}</p>
     <p className="text-sm text-muted-foreground">Θα δούμε κάθε κανόνα με παραδείγματα, θα τον δοκιμάσεις μόνος σου και στο τέλος θα έχεις ένα μικρό τεστ.</p>
   </div>
 );
@@ -78,7 +64,6 @@ export const RuleStep = ({ rule, ruleIndex, total }: RuleStepProps) => {
         </div>
       )}
 
-      <Say>{lolaNudge(ruleIndex)}</Say>
     </div>
   );
 };
@@ -87,7 +72,6 @@ export const TableStep = ({ table }: { table: GrammarTableData }) => (
   <div className="space-y-5">
     <p className="text-xs font-extrabold tracking-wide text-muted-foreground uppercase">Ο πίνακας</p>
     <GrammarTable table={table} />
-    <Say>Πάτα τις λέξεις του πίνακα για να δεις τι σημαίνουν. Δες καλά ποιες μορφές αλλάζουν.</Say>
   </div>
 );
 
@@ -107,6 +91,5 @@ export const TipsStep = ({ tips }: { tips: string[] }) => (
         </li>
       ))}
     </ul>
-    <Say>Αυτά είναι τα λάθη που κάνουν όλοι. Εσύ όχι πια.</Say>
   </div>
 );

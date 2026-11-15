@@ -1,4 +1,5 @@
 import { ALL_VOCAB, EVERY_LESSON, type FlatLesson, type FlatVocab, lessonByKey, lessonsForUnits, verbsForUnits, vocabForUnits, withArticle } from "@/lib/content/selectors";
+import { isWordLearned } from "@/lib/game/progress";
 import { lessonSource, matchSource, verbSource, vocabSource } from "@/lib/game/sources";
 import { acceptedForms, greekForms, sample, shuffle } from "@/lib/game/text";
 import type {
@@ -13,6 +14,9 @@ import type {
 import { isDue, masteryOf, type StoredCard } from "@/lib/srs/fsrs";
 import type { SavedWord } from "@/lib/stores/progress-store";
 import type { Drill, ExampleSentence, Verb } from "@/types/content";
+
+/** Words in one guided flashcard round: small enough to finish, big enough to matter. */
+const FOCUS_ROUND = 12;
 
 export interface LearnerSnapshot {
   taughtLessons: string[];
@@ -429,16 +433,28 @@ export const buildFlashcards = ({
   unitIds,
   pages,
   cards,
+  wordResults = {},
+  focus = false,
   limitNew = 10,
   limitTotal = 30,
 }: {
   unitIds: number[];
   pages?: number[];
   cards: Record<string, StoredCard>;
+  /** Whether the last answer to each word was right (`vamos` progress `wordResults`). */
+  wordResults?: Record<string, boolean>;
+  /** Only the words that are not known yet: the ones answered wrong first, then the new ones. */
+  focus?: boolean;
   limitNew?: number;
   limitTotal?: number;
 }): FlatVocab[] => {
   const pool = vocabForUnits(unitIds, pages);
+  if (focus) {
+    const unknown = pool.filter((item) => !isWordLearned({ stored: cards[item.id], result: wordResults[item.id] }));
+    const missed = shuffle(unknown.filter((item) => wordResults[item.id] === false));
+    const fresh = shuffle(unknown.filter((item) => wordResults[item.id] === undefined));
+    return [...missed, ...fresh].slice(0, FOCUS_ROUND);
+  }
   const now = new Date();
   const due = pool
     .filter((item) => cards[item.id] && isDue({ stored: cards[item.id], now }))

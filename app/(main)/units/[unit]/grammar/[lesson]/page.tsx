@@ -1,11 +1,13 @@
-import { ArrowRight, Dumbbell, Sparkles } from "lucide-react";
+import { ArrowRight, Dumbbell } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { LearnLessonButton } from "@/components/grammar/learn-lesson-button";
 import { LessonBody } from "@/components/grammar/lesson-body";
 import { TaughtToggle } from "@/components/grammar/taught-toggle";
 import { SourceLink } from "@/components/pdf/source-link";
+import { GrammarProgressBar } from "@/components/progress/sticky-progress";
 import { Button } from "@/components/ui/button";
 import { UNITS, VERBS } from "@/content";
 import { getLesson, getUnit, onUnitColor } from "@/lib/content/selectors";
@@ -43,6 +45,8 @@ const LessonPage = async ({ params }: { params: Promise<LessonParams> }) => {
 
   return (
     <article className="mx-auto max-w-3xl space-y-8">
+      <GrammarProgressBar lessonKey={key} />
+
       <nav aria-label="Διαδρομή" className="text-sm font-bold text-muted-foreground">
         <Link href="/units" className="hover:text-foreground hover:underline">
           Aula
@@ -65,11 +69,7 @@ const LessonPage = async ({ params }: { params: Promise<LessonParams> }) => {
         <p className="text-lg font-bold text-muted-foreground">{lesson.titleEl}</p>
         <p className="pt-2 text-lg leading-relaxed">{lesson.introEl}</p>
         <div className="pt-3">
-          <Button asChild variant="chunky" size="xl">
-            <Link href={`/play/learn?lesson=${key}&back=${back}`}>
-              <Sparkles /> Μάθε το βήμα βήμα με τη Λόλα
-            </Link>
-          </Button>
+          <LearnLessonButton lessonKey={key} back={back} />
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <TaughtToggle lessonKey={key} />

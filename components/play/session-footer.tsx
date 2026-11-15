@@ -1,15 +1,15 @@
 "use client";
 
 import { ArrowRight, Check, SkipForward, X } from "lucide-react";
+import { useEffect } from "react";
 
-import { LolaFooterStage } from "@/components/mascot/lola-companion";
-import { SpeechBubble } from "@/components/mascot/speech-bubble";
 import { TappableText } from "@/components/tappable-text";
 import { Translation } from "@/components/translation";
 import { Button } from "@/components/ui/button";
 import type { Exercise, ExerciseResult } from "@/lib/game/types";
 import { cn } from "@/lib/general/utils";
 import { lolaReaction } from "@/lib/mascot/lines";
+import { useLolaStore } from "@/lib/stores/lola-store";
 import { useSettingsStore } from "@/lib/stores/settings-store";
 
 const PRAISE = ["Μπράβο!", "Σωστά!", "Τέλεια!", "Εξαιρετικά!", "Ακριβώς!"];
@@ -37,6 +37,7 @@ export const SessionFooter = ({
   onContinue,
 }: SessionFooterProps) => {
   const mascot = useSettingsStore((state) => state.mascot);
+  const say = useLolaStore((state) => state.say);
   const checked = result !== null;
   /** Choice and match exercises check themselves; typing and ordering keep the button for wrong answers. */
   const hasCheck = exercise.kind === "type" || exercise.kind === "order";
@@ -45,6 +46,11 @@ export const SessionFooter = ({
   const example = "example" in exercise ? exercise.example : undefined;
   const reaction = lolaReaction({ correct: result?.correct ?? false, position });
   const plainTitle = result?.correct ? PRAISE[position % PRAISE.length] : "Όχι ακριβώς";
+
+  // she reacts out loud, in her speech bubble, the moment the answer is checked
+  useEffect(() => {
+    if (checked && mascot) say(reaction);
+  }, [checked, mascot, reaction, say]);
 
   /** The right answer and the helpful extras, shown inside Lola's bubble or, without her, on their own. */
   const details = result && (
@@ -69,23 +75,17 @@ export const SessionFooter = ({
   return (
     <footer
       className={cn(
-        "safe-bottom fixed inset-x-0 bottom-0 z-30 border-t-2 transition-colors",
+        "safe-bottom relative z-30 shrink-0 border-t-2 transition-colors",
         !checked && "border-border bg-background",
         checked && result.correct && "border-success/40 bg-success-soft",
         checked && !result.correct && "border-destructive/40 bg-danger-soft",
       )}
     >
-      <LolaFooterStage mood={checked ? reaction.mood : "teaching"} animateKey={`${position}-${checked}`} className="flex flex-col gap-3">
-        {checked && mascot && (
-          <SpeechBubble tone={result.correct ? "calm" : "loud"} tail="left-low" className="space-y-1">
-            <p role="status" className="font-es text-xl leading-tight font-bold italic">
-              <TappableText text={reaction.es} />
-              <span className="sr-only">{result.correct ? " Σωστά." : " Λάθος."}</span>
-            </p>
-            {reaction.el && <Translation text={reaction.el} className="text-sm leading-snug font-bold text-inherit" />}
-            {details}
-          </SpeechBubble>
+      <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 px-4 py-4">
+        {checked && mascot && !result.correct && (
+          <div className="space-y-1 rounded-2xl bg-card/70 px-3 py-2 motion-safe:animate-rise">{details}</div>
         )}
+        {checked && mascot && <span className="sr-only" role="status">{result.correct ? "Σωστά." : "Λάθος."}</span>}
 
         {checked && !mascot && (
           <div className="flex items-start gap-3 motion-safe:animate-rise" role="status">
@@ -130,7 +130,7 @@ export const SessionFooter = ({
             </Button>
           )}
         </div>
-      </LolaFooterStage>
+      </div>
     </footer>
   );
 };

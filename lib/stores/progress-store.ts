@@ -19,6 +19,16 @@ interface RightWrong {
   wrong: number;
 }
 
+/** Where the learner stopped in the step-by-step lesson of one grammar topic. */
+export interface LessonProgress {
+  /** The step to resume at. 0 when the lesson has not been started or was just finished. */
+  step: number;
+  /** How many steps the lesson has (before the end screen), to show a percentage. */
+  total: number;
+  /** The lesson was finished at least once. */
+  done: boolean;
+}
+
 interface ProgressData {
   xp: number;
   xpByDay: Record<string, number>;
@@ -29,6 +39,10 @@ interface ProgressData {
   classUnit: number;
   /** FSRS state of every vocabulary card, keyed by vocabulary id (or `saved:<id>`). */
   cards: Record<string, StoredCard>;
+  /** Whether the last answer to each vocabulary card was right: the chapter's "I know it" percentage. */
+  wordResults: Record<string, boolean>;
+  /** Step-by-step lesson progress by grammar key (`1:genero`, `gu:50`). */
+  lessonProgress: Record<string, LessonProgress>;
   drillStats: Record<string, RightWrong>;
   verbStats: Record<string, RightWrong>;
   sessionsDone: number;
@@ -44,6 +58,8 @@ interface ProgressData {
 
 interface ProgressActions {
   rateCard: (params: { id: string; rating: CardRating }) => void;
+  setLessonStep: (params: { key: string; step: number; total: number }) => void;
+  completeLesson: (params: { key: string; total: number }) => void;
   addXp: (amount: number) => void;
   recordDrill: (params: { key: string; correct: boolean }) => void;
   recordVerb: (params: { verbId: string; correct: boolean }) => void;
@@ -69,6 +85,8 @@ const INITIAL: ProgressData = {
   dailyGoal: 50,
   classUnit: 1,
   cards: {},
+  wordResults: {},
+  lessonProgress: {},
   drillStats: {},
   verbStats: {},
   sessionsDone: 0,
@@ -91,7 +109,15 @@ export const useProgressStore = create<ProgressStore>()(
       ...INITIAL,
 
       rateCard: ({ id, rating }) =>
-        set((state) => ({ cards: { ...state.cards, [id]: reviewCard({ stored: state.cards[id], rating }) } })),
+        set((state) => ({
+          cards: { ...state.cards, [id]: reviewCard({ stored: state.cards[id], rating }) },
+          wordResults: { ...state.wordResults, [id]: rating !== "again" },
+        })),
+
+      setLessonStep: ({ key, step, total }) =>
+        set((state) => ({ lessonProgress: { ...state.lessonProgress, [key]: { step, total, done: state.lessonProgress[key]?.done ?? false } } })),
+
+      completeLesson: ({ key, total }) => set((state) => ({ lessonProgress: { ...state.lessonProgress, [key]: { step: 0, total, done: true } } })),
 
       addXp: (amount) =>
         set((state) => {
@@ -197,6 +223,8 @@ export const snapshotProgress = (state: ProgressStore): ProgressData => ({
   dailyGoal: state.dailyGoal,
   classUnit: state.classUnit,
   cards: state.cards,
+  wordResults: state.wordResults,
+  lessonProgress: state.lessonProgress,
   drillStats: state.drillStats,
   verbStats: state.verbStats,
   sessionsDone: state.sessionsDone,

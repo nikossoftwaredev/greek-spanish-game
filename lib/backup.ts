@@ -10,7 +10,7 @@ export interface BackupFile {
   exportedAt: string;
   progress: ReturnType<typeof snapshotProgress>;
   homework: HomeworkTask[];
-  settings: { mascot?: boolean; showTranslations?: boolean; cardDirection?: "es-el" | "el-es" };
+  settings: { mascot?: boolean; showTranslations?: boolean; cardDirection?: "es-el" | "el-es"; sounds?: boolean; lolaVoice?: boolean };
 }
 
 export interface BackupSummary {
@@ -31,7 +31,7 @@ const currentBackup = (): BackupFile => {
     exportedAt: new Date().toISOString(),
     progress: snapshotProgress(useProgressStore.getState() as ProgressStore),
     homework: useHomeworkStore.getState().tasks,
-    settings: { mascot: settings.mascot, showTranslations: settings.showTranslations, cardDirection: settings.cardDirection },
+    settings: { mascot: settings.mascot, showTranslations: settings.showTranslations, cardDirection: settings.cardDirection, sounds: settings.sounds, lolaVoice: settings.lolaVoice },
   };
 };
 
@@ -112,6 +112,8 @@ export const applyBackup = (backup: BackupFile): void => {
     useSettingsStore.getState().setMascot(backup.settings.mascot !== false);
     useSettingsStore.getState().setShowTranslations(backup.settings.showTranslations === true);
     useSettingsStore.getState().setCardDirection(backup.settings.cardDirection === "es-el" ? "es-el" : "el-es");
+    useSettingsStore.getState().setSounds(backup.settings.sounds !== false);
+    useSettingsStore.getState().setLolaVoice(backup.settings.lolaVoice !== false);
   }
 };
 

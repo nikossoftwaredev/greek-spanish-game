@@ -1,8 +1,9 @@
 "use client";
 
-import { ArrowRight, ClipboardList, Flame, Layers, MessageSquareText, Plus, Sparkles, SpellCheck, Star } from "lucide-react";
+import { ArrowRight, ClipboardList, Flame, MessageSquareText, Plus, Sparkles, SpellCheck, Star } from "lucide-react";
 import Link from "next/link";
 
+import { InstallBanner } from "@/components/app-shell/install-app";
 import { CLASS_NOTES_DIALOG } from "@/components/homework/class-notes-dialog";
 import { DueChip } from "@/components/homework/due-chip";
 import { HOMEWORK_DIALOG } from "@/components/homework/homework-dialog";
@@ -13,7 +14,7 @@ import { UnitCard } from "@/components/unit/unit-card";
 import { UNITS } from "@/content";
 import { useHydrated } from "@/hooks/use-hydrated";
 import { onUnitColor } from "@/lib/content/selectors";
-import { masteryForUnits } from "@/lib/game/mastery";
+import { nextStepForUnit } from "@/lib/game/progress";
 import { todayKey } from "@/lib/game/text";
 import { cn } from "@/lib/general/utils";
 import { compareByDue } from "@/lib/homework/format";
@@ -149,14 +150,20 @@ export const HomeDashboard = () => {
   const activeDays = useProgressStore((state) => state.activeDays);
   const cards = useProgressStore((state) => state.cards);
   const classUnit = useProgressStore((state) => state.classUnit);
+  const wordResults = useProgressStore((state) => state.wordResults);
+  const drillStats = useProgressStore((state) => state.drillStats);
+  const lessonProgress = useProgressStore((state) => state.lessonProgress);
+
+  const learner = hydrated ? { cards, wordResults, drillStats, lessonProgress } : { cards: {}, wordResults: {}, drillStats: {}, lessonProgress: {} };
+  const next = nextStepForUnit({ unitId: classUnit, progress: learner, back: encodeURIComponent("/") });
 
   const streak = hydrated ? computeStreak(activeDays).current : 0;
-  const unitsSoFar = UNITS.filter((unit) => unit.id <= classUnit).map((unit) => unit.id);
-  const mastery = masteryForUnits({ unitIds: unitsSoFar, cards: hydrated ? cards : {} });
   const goalPercent = hydrated ? Math.min(100, (xpToday / dailyGoal) * 100) : 0;
 
   return (
     <div className="space-y-6">
+      <InstallBanner />
+
       <section className="relative overflow-hidden rounded-[2rem] border-2 border-border bg-card p-6 shadow-[0_5px_0_0_var(--border)] sm:p-8">
         <div className="pointer-events-none absolute -top-16 -right-10 size-56 rounded-full bg-primary/10" aria-hidden />
         <div className="pointer-events-none absolute -bottom-20 left-1/3 size-48 rounded-full bg-sun/20" aria-hidden />
@@ -183,21 +190,14 @@ export const HomeDashboard = () => {
                 )}
               </p>
             </div>
-            <div className="flex flex-wrap gap-3">
-              <Button asChild variant="chunky" size="xl">
-                <Link href="/play/mix">
-                  <Sparkles /> Ξεκίνα την εξάσκηση
-                </Link>
-              </Button>
-              <Button asChild variant="chunky-outline" size="xl">
-                <Link href="/play/flashcards">
-                  <Layers /> Επανάληψη
-                  {hydrated && mastery.due > 0 && (
-                    <span className="rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground tabular-nums">{mastery.due}</span>
-                  )}
-                </Link>
-              </Button>
-            </div>
+            <Button asChild variant="chunky" size="xl" className="h-auto w-full flex-col items-start gap-0.5 py-3.5 sm:w-auto sm:min-w-80">
+              <Link href={next.href}>
+                <span className="flex items-center gap-2 text-lg">
+                  <Sparkles /> Ξεκίνα: {next.title}
+                </span>
+                <span className="text-xs font-semibold opacity-90">{hydrated ? next.detail : "Φορτώνει…"}</span>
+              </Link>
+            </Button>
           </div>
         </div>
       </section>

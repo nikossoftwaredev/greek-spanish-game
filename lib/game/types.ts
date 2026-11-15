@@ -118,6 +118,10 @@ export interface SessionConfig {
   taught?: boolean;
   /** Mix mode: take grammar drills from the taught lessons, when there are any. */
   useTaught?: boolean;
+  /** The chapter a guided session belongs to: its end screen offers the next step of that chapter. */
+  chapter?: number;
+  /** Flashcards: only the words the learner does not know yet, the ones answered wrong first. */
+  focus?: boolean;
   /** Homework this session belongs to. */
   homeworkId?: string;
   /** Flashcards of the words the learner saved from the dictionary panel. */

@@ -1,10 +1,11 @@
 "use client";
 
-import { BookMarked, Download, Flame, GraduationCap, Languages, Layers, RotateCcw, Share2, Smile, Star, Trash2, Trophy, Upload } from "lucide-react";
+import { AudioLines, BookMarked, Download, Flame, GraduationCap, Languages, Layers, RotateCcw, Share2, Smile, Star, Trash2, Trophy, Upload, Volume2 } from "lucide-react";
 import Link from "next/link";
 import { useRef } from "react";
 import { toast } from "sonner";
 
+import { InstallButton } from "@/components/app-shell/install-app";
 import { CONFIRM_DIALOG } from "@/components/confirm-dialog";
 import { PdfBookLoader } from "@/components/pdf/pdf-book-loader";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,27 @@ const lastDays = (count: number): string[] =>
     return todayKey(date);
   });
 
+interface SettingSwitchProps {
+  id: string;
+  icon: React.ReactNode;
+  label: string;
+  checked: boolean;
+  onChange: (value: boolean) => void;
+}
+
+/** One on/off setting: an icon, what it does, and the switch. */
+const SettingSwitch = ({ id, icon, label, checked, onChange }: SettingSwitchProps) => (
+  <div className="flex items-center justify-between gap-3">
+    <Label htmlFor={id} className="flex items-center gap-2 font-bold">
+      <span className="[&_svg]:size-4" aria-hidden>
+        {icon}
+      </span>{" "}
+      {label}
+    </Label>
+    <Switch id={id} checked={checked} onCheckedChange={onChange} />
+  </div>
+);
+
 export const ProgressDashboard = () => {
   const hydrated = useHydrated();
   const openDialog = useDialogStore((state) => state.openDialog);
@@ -57,6 +79,10 @@ export const ProgressDashboard = () => {
   const savedWords = useProgressStore((state) => state.savedWords);
   const removeSavedWord = useProgressStore((state) => state.removeSavedWord);
   const mascot = useSettingsStore((state) => state.mascot);
+  const sounds = useSettingsStore((state) => state.sounds);
+  const setSounds = useSettingsStore((state) => state.setSounds);
+  const lolaVoice = useSettingsStore((state) => state.lolaVoice);
+  const setLolaVoice = useSettingsStore((state) => state.setLolaVoice);
   const setMascot = useSettingsStore((state) => state.setMascot);
   const showTranslations = useSettingsStore((state) => state.showTranslations);
   const setShowTranslations = useSettingsStore((state) => state.setShowTranslations);
@@ -305,19 +331,15 @@ export const ProgressDashboard = () => {
           </Select>
         </div>
 
-        <div className="flex items-center justify-between gap-3">
-          <Label htmlFor="mascot" className="flex items-center gap-2 font-bold">
-            <Smile className="size-4" aria-hidden /> Η Λόλα μένει στην οθόνη και σχολιάζει τις απαντήσεις (και με μαλώνει)
-          </Label>
-          <Switch id="mascot" checked={mascot} onCheckedChange={setMascot} />
-        </div>
+        <SettingSwitch id="mascot" icon={<Smile />} label="Η Λόλα μένει στην οθόνη και σχολιάζει τις απαντήσεις (και με μαλώνει)" checked={mascot} onChange={setMascot} />
 
-        <div className="flex items-center justify-between gap-3">
-          <Label htmlFor="translations" className="flex items-center gap-2 font-bold">
-            <Languages className="size-4" aria-hidden /> Να φαίνονται πάντα οι μεταφράσεις (αλλιώς τις βλέπεις με κουμπί)
-          </Label>
-          <Switch id="translations" checked={showTranslations} onCheckedChange={setShowTranslations} />
-        </div>
+        <SettingSwitch id="sounds" icon={<Volume2 />} label="Ήχος όταν απαντάς σωστά" checked={sounds} onChange={setSounds} />
+
+        <SettingSwitch id="lola-voice" icon={<AudioLines />} label="Η Λόλα μιλάει φωναχτά (αν το κινητό έχει ισπανική φωνή)" checked={lolaVoice} onChange={setLolaVoice} />
+
+        <InstallButton variant="chunky-outline" />
+
+        <SettingSwitch id="translations" icon={<Languages />} label="Να φαίνονται πάντα οι μεταφράσεις (αλλιώς τις βλέπεις με κουμπί)" checked={showTranslations} onChange={setShowTranslations} />
 
         <div className="flex flex-wrap gap-2 border-t-2 border-border pt-5">
           <Button type="button" variant="ghost" className="text-destructive hover:text-destructive" onClick={handleReset} icon={<RotateCcw />}>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { UnitProgressBar } from "@/components/progress/sticky-progress";
 import { UnitHero } from "@/components/unit/unit-hero";
 import { UnitTabs } from "@/components/unit/unit-tabs";
 import { UNITS, VERBS } from "@/content";
@@ -36,6 +37,8 @@ const UnitPage = async ({ params }: { params: Promise<{ unit: string }> }) => {
 
   return (
     <div className="space-y-6">
+      <UnitProgressBar unitId={unit.id} />
+
       <nav aria-label="Διαδρομή" className="text-sm font-bold text-muted-foreground">
         <Link href="/units" className="hover:text-foreground hover:underline">
           Κεφάλαια

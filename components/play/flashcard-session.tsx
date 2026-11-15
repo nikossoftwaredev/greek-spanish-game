@@ -5,19 +5,21 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { CONFIRM_DIALOG } from "@/components/confirm-dialog";
-import { LolaFooterStage } from "@/components/mascot/lola-companion";
 import { TappableText } from "@/components/tappable-text";
 import { Button } from "@/components/ui/button";
 import { type FlatVocab, withArticle } from "@/lib/content/selectors";
 import { buildFlashcards, buildSavedFlashcards } from "@/lib/game/builders";
+import { chapterOf } from "@/lib/game/progress";
 import { summarizeSources, vocabSource } from "@/lib/game/sources";
 import type { SessionConfig } from "@/lib/game/types";
 import { cn } from "@/lib/general/utils";
-import { type CardRating, previewIntervals } from "@/lib/srs/fsrs";
+import { playCorrect } from "@/lib/sound";
+import { type CardRating } from "@/lib/srs/fsrs";
 import { useDialogStore } from "@/lib/stores/dialog-store";
 import { useProgressStore } from "@/lib/stores/progress-store";
 import { useSettingsStore } from "@/lib/stores/settings-store";
 
+import { PlayFooter, PlayShell } from "./play-shell";
 import { SessionSummary } from "./session-summary";
 import { SourceBadge } from "./source-badge";
 
@@ -31,15 +33,6 @@ const RATINGS: { value: Rating; label: string; variant: "danger" | "success"; ke
   { value: "good", label: "Το ήξερα", variant: "success", key: "2" },
 ];
 
-const formatInterval = (days: number): string => {
-  if (days <= 0) return "σήμερα";
-  if (days === 1) return "1 ημέρα";
-  if (days < 30) return `${days} ημέρες`;
-  const months = Math.round(days / 30);
-  return `${months} ${months === 1 ? "μήνας" : "μήνες"}`;
-};
-
-
 interface FlashcardSessionProps {
   config: SessionConfig;
   title: string;
@@ -52,9 +45,9 @@ interface FlashcardRoundProps extends FlashcardSessionProps {
 }
 
 const startDeck = (config: SessionConfig): FlatVocab[] => {
-  const { cards, savedWords } = useProgressStore.getState();
+  const { cards, savedWords, wordResults } = useProgressStore.getState();
   if (config.saved) return buildSavedFlashcards({ saved: savedWords, cards });
-  return buildFlashcards({ unitIds: config.unitIds, pages: config.pages, cards });
+  return buildFlashcards({ unitIds: config.unitIds, pages: config.pages, cards, wordResults, focus: config.focus });
 };
 
 /** One round of flashcards. The parent remounts it (new `key`) to start a fresh round. */
@@ -62,13 +55,14 @@ const FlashcardRound = ({ config, title, exitHref, exitLabel, onAgain }: Flashca
   const router = useRouter();
   const openDialog = useDialogStore((state) => state.openDialog);
 
-  const [deck] = useState<FlatVocab[]>(() => startDeck(config));
+  const [deck, setDeck] = useState<FlatVocab[]>(() => startDeck(config));
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const direction = useSettingsStore((state) => state.cardDirection);
   const setDirection = useSettingsStore((state) => state.setCardDirection);
   const [xp, setXp] = useState(0);
   const [again, setAgain] = useState(0);
+  const [good, setGood] = useState(0);
   const [finished, setFinished] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [startedAt] = useState(() => Date.now());
@@ -77,7 +71,6 @@ const FlashcardRound = ({ config, title, exitHref, exitLabel, onAgain }: Flashca
   const source = card ? vocabSource(card) : undefined;
   const total = deck.length;
   const progress = (index / total) * 100;
-  const previews = card && flipped ? previewIntervals({ stored: useProgressStore.getState().cards[card.id] }) : null;
 
   const handleFlip = () => setFlipped((value) => !value);
 
@@ -85,11 +78,17 @@ const FlashcardRound = ({ config, title, exitHref, exitLabel, onAgain }: Flashca
     if (!card) return;
     const store = useProgressStore.getState();
     store.rateCard({ id: card.id, rating });
+    if (rating === "good") playCorrect();
     store.addXp(XP_PER_CARD[rating]);
     setXp((value) => value + XP_PER_CARD[rating]);
-    if (rating === "again") setAgain((value) => value + 1);
+    // A word that was not known comes back at the end of the round, until it is known.
+    if (rating === "again") {
+      setAgain((value) => value + 1);
+      setDeck((current) => [...current, card]);
+    } else setGood((value) => value + 1);
 
-    if (index + 1 >= total) {
+    const roundLength = rating === "again" ? total + 1 : total;
+    if (index + 1 >= roundLength) {
       store.finishSession();
       setSeconds(Math.round((Date.now() - startedAt) / 1000));
       setFinished(true);
@@ -128,8 +127,9 @@ const FlashcardRound = ({ config, title, exitHref, exitLabel, onAgain }: Flashca
       <SessionSummary
         title={title}
         xpGained={xp}
-        correct={total - again}
+        correct={good}
         wrong={again}
+        chapter={chapterOf(config)}
         seconds={seconds}
         exitHref={exitHref}
         exitLabel={exitLabel}
@@ -155,8 +155,9 @@ const FlashcardRound = ({ config, title, exitHref, exitLabel, onAgain }: Flashca
   const frontIsSpanish = direction === "es-el";
 
   return (
-    <div className="flex min-h-svh flex-col">
-      <header className="mx-auto flex w-full max-w-2xl items-center gap-3 px-4 pt-4">
+    <PlayShell
+      header={
+        <>
         <Button type="button" variant="ghost" size="icon" aria-label="Έξοδος" onClick={handleExit}>
           <X />
         </Button>
@@ -180,9 +181,10 @@ const FlashcardRound = ({ config, title, exitHref, exitLabel, onAgain }: Flashca
         >
           {frontIsSpanish ? "ES → ΕΛ" : "ΕΛ → ES"}
         </Button>
-      </header>
-
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center gap-6 px-4 pt-6 pb-56">
+        </>
+      }
+    >
+      <div className="flex w-full flex-1 flex-col items-center gap-6">
         {card && (
           <>
             <div className="space-y-1.5 text-center">
@@ -237,10 +239,11 @@ const FlashcardRound = ({ config, title, exitHref, exitLabel, onAgain }: Flashca
             </div>
           </>
         )}
-      </main>
+      </div>
 
-      <footer className="safe-bottom fixed inset-x-0 bottom-0 z-30 border-t-2 border-border bg-background">
-        <LolaFooterStage mood="teaching" animateKey={index}>
+      <PlayFooter>
+      <footer className="safe-bottom relative z-30 shrink-0 border-t-2 border-border bg-background">
+        <div className="mx-auto w-full max-w-2xl px-4 py-4">
           {!flipped && (
             <Button type="button" variant="chunky" size="xl" className="w-full" onClick={handleFlip}>
               Δείξε την απάντηση
@@ -259,15 +262,15 @@ const FlashcardRound = ({ config, title, exitHref, exitLabel, onAgain }: Flashca
                     className="h-auto flex-col gap-0 py-2.5"
                   >
                     <span className="text-sm">{rating.label}</span>
-                    <span className="text-[0.65rem] font-semibold opacity-80">{previews ? formatInterval(previews[rating.value]) : ""}</span>
                   </Button>
                 ))}
               </div>
             </div>
           )}
-        </LolaFooterStage>
+        </div>
       </footer>
-    </div>
+      </PlayFooter>
+    </PlayShell>
   );
 };
 

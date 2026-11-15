@@ -1,12 +1,14 @@
-import { ArrowLeft, ArrowRight, BookOpen, Dumbbell, Link2, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, Dumbbell, Link2 } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { GuExerciseList } from "@/components/gramatica/gu-exercise-list";
+import { LearnLessonButton } from "@/components/grammar/learn-lesson-button";
 import { LessonBody } from "@/components/grammar/lesson-body";
 import { TaughtToggle } from "@/components/grammar/taught-toggle";
 import { SourceLink } from "@/components/pdf/source-link";
+import { GrammarProgressBar } from "@/components/progress/sticky-progress";
 import { Button } from "@/components/ui/button";
 import { GU_UNITS } from "@/content/gramatica";
 import { GU_TO_AULA_LESSONS } from "@/content/gramatica-de-uso";
@@ -35,6 +37,8 @@ const GramaticaUnitPage = async ({ params }: { params: Promise<{ unit: string }>
 
   return (
     <article className="mx-auto max-w-3xl space-y-8">
+      <GrammarProgressBar lessonKey={key} />
+
       <nav aria-label="Διαδρομή" className="text-sm font-bold text-muted-foreground">
         <Link href="/gramatica" className="hover:text-foreground hover:underline">
           Gramática de uso
@@ -50,11 +54,7 @@ const GramaticaUnitPage = async ({ params }: { params: Promise<{ unit: string }>
         <p className="text-lg font-bold text-muted-foreground">{unit.titleEl}</p>
         <p className="pt-2 text-lg leading-relaxed">{unit.introEl}</p>
         <div className="pt-3">
-          <Button asChild variant="chunky" size="xl">
-            <Link href={`/play/learn?lesson=${key}&back=${back}`}>
-              <Sparkles /> Μάθε το βήμα βήμα με τη Λόλα
-            </Link>
-          </Button>
+          <LearnLessonButton lessonKey={key} back={back} />
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <TaughtToggle lessonKey={key} />

@@ -4,9 +4,11 @@ import { useCallback, useState } from "react";
 
 import type { Evaluator } from "@/components/play/exercise-types";
 import { ExerciseView, solutionOf } from "@/components/play/exercise-view";
+import { PlayFooter } from "@/components/play/play-shell";
 import { SessionFooter } from "@/components/play/session-footer";
 import { useEnterKey } from "@/components/play/use-enter-key";
 import type { Exercise, ExerciseResult } from "@/lib/game/types";
+import { playCorrect } from "@/lib/sound";
 import { useProgressStore } from "@/lib/stores/progress-store";
 
 interface ExerciseStepProps {
@@ -32,7 +34,10 @@ export const ExerciseStep = ({ exercise, position, xpCorrect, onNext }: Exercise
     setResult(outcome);
     const store = useProgressStore.getState();
     if (exercise.drillKey) store.recordDrill({ key: exercise.drillKey, correct: outcome.correct });
-    if (outcome.correct) store.addXp(xpCorrect);
+    if (outcome.correct) {
+      store.addXp(xpCorrect);
+      playCorrect();
+    }
   };
 
   const handleCheck = () => {
@@ -52,16 +57,18 @@ export const ExerciseStep = ({ exercise, position, xpCorrect, onNext }: Exercise
       <div className="flex flex-1 flex-col">
         <ExerciseView exercise={exercise} locked={checked} result={result} onReady={handleReady} onComplete={applyResult} />
       </div>
-      <SessionFooter
-        exercise={exercise}
-        result={result}
-        canCheck={evaluator !== null}
-        isLast={false}
-        position={position}
-        onCheck={handleCheck}
-        onSkip={handleSkip}
-        onContinue={handleContinue}
-      />
+      <PlayFooter>
+        <SessionFooter
+          exercise={exercise}
+          result={result}
+          canCheck={evaluator !== null}
+          isLast={false}
+          position={position}
+          onCheck={handleCheck}
+          onSkip={handleSkip}
+          onContinue={handleContinue}
+        />
+      </PlayFooter>
     </>
   );
 };

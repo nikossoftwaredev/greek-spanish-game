@@ -70,23 +70,3 @@ export const masteryOf = (stored?: StoredCard): Mastery => {
   if (stored.reps >= 2 && stored.stability >= 5 && stored.state === State.Review) return "known";
   return "learning";
 };
-
-/** Previews the interval each rating would give, for the flashcard buttons. */
-export const previewIntervals = ({
-  stored,
-  now = new Date(),
-}: {
-  stored?: StoredCard;
-  now?: Date;
-}): Record<CardRating, number> => {
-  const base: CardInput | Card = stored ?? createEmptyCard(now);
-  const preview = scheduler.repeat(base, now);
-  const days = (grade: Grade): number =>
-    Math.max(0, Math.round((preview[grade].card.due.getTime() - now.getTime()) / 86_400_000));
-  return {
-    again: days(Rating.Again),
-    hard: days(Rating.Hard),
-    good: days(Rating.Good),
-    easy: days(Rating.Easy),
-  };
-};

@@ -1,3 +1,5 @@
+import { clamp } from "@/lib/general/utils";
+
 interface ProgressRingProps {
   /** 0 to 100. */
   value: number;
@@ -11,7 +13,7 @@ interface ProgressRingProps {
 export const ProgressRing = ({ value, size = 112, stroke = 12, children, label }: ProgressRingProps) => {
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
-  const clamped = Math.min(100, Math.max(0, value));
+  const clamped = clamp({ value, min: 0, max: 100 });
 
   return (
     <div

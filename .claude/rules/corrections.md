@@ -21,6 +21,9 @@ Rules learned from actual corrections. These are binding.
 
 ## Known traps
 
+- **A fixed bottom bar inside an animated wrapper floats mid-screen on a real phone.** A lesson footer was `position: fixed` inside an element whose `rise` animation (fill-mode `both`) left `transform` behind, so the footer sat in the middle of the screen on the learner's phone while it looked right in a desktop browser. Layout for full-screen screens is `PlayShell` (normal flow, `h-dvh`), keyframes end in `transform: none`, and a mobile fix is only verified at a real phone size with the footer's distance from the bottom measured (`0`), never by eye alone.
+- **React closures are one render behind a pointer stream.** `pointerup` can fire before the last `pointermove` has re-rendered, so a drag handler that reads state in `pointerup` stores a position one step short. Keep the latest value in a ref (as `LolaCompanion` does with `drag.current.last`).
+
 - **A wrong canonical origin is permanent damage.** Never paste a `*.vercel.app` URL as the site base to unblock a build. Full rule: `.claude/rules/deployment-urls.md`.
 - **`tsc` + `lint` passing does not mean it works.** next-intl message caching, Prisma client staleness, and env-var inlining all survive a green typecheck. Drive the feature in the running app.
 - **Read the port `pnpm dev` actually bound.** If 3000 is taken, Next silently moves to 3001, and screenshots of `localhost:3000` capture a different app. Check the `Local:` line before verifying anything.

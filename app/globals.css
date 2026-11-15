@@ -100,18 +100,19 @@
       opacity: 0;
     }
     100% {
-      transform: scale(1);
+      transform: none;
       opacity: 1;
     }
   }
 
+  /* The last frame must be transform: none. A leftover transform makes the element the containing block of any fixed child (a footer) and pulls it off the bottom of the screen. */
   @keyframes rise {
     0% {
       transform: translateY(14px);
       opacity: 0;
     }
     100% {
-      transform: translateY(0);
+      transform: none;
       opacity: 1;
     }
   }
@@ -267,6 +268,10 @@ html body[data-scroll-locked] {
   padding-bottom: max(env(safe-area-inset-bottom), 0px);
 }
 
+@utility safe-top {
+  padding-top: max(env(safe-area-inset-top), 0px);
+}
+
 /* Lola, the mascot: illustration colours, identical in light and dark mode. */
 :root {
   --lola-skin: #c98b62;
@@ -303,4 +308,12 @@ html body[data-scroll-locked] {
   --muted: oklch(0.945 0.022 84);
   --muted-foreground: oklch(0.5 0.035 50);
   --border: oklch(0.88 0.028 78);
+}
+
+/* The installed app is a phone app: no pull-to-refresh or rubber-band scrolling of the whole page. */
+@media (display-mode: standalone) {
+  html,
+  body {
+    overscroll-behavior-y: none;
+  }
 }

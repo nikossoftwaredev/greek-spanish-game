@@ -20,7 +20,7 @@ paths:
 | --- | --- |
 | `TappableText` (`components/tappable-text.tsx`) | Any Spanish text the learner may want to look up. Opens the word panel through the dialog store. |
 | `ProgressRing` (`components/progress-ring.tsx`) | Circular progress meters. |
-| `Lola` (`components/mascot/lola.tsx`) | The mascot: `<Lola mood="happy" />`. Moods `teaching`, `happy`, `proud`, `angry`. |
+| `Lola` (`components/mascot/lola.tsx`) | The mascot drawing (moods `teaching`, `happy`, `wink`, `proud`, `annoyed`, `angry`). Never place her yourself: the floating `LolaCompanion` is the only one, and screens make her talk with `useLolaStore().say()`. |
 | `ConjugationTable` (`components/verbs/conjugation-table.tsx`) | The present tense of one verb with irregular forms highlighted. |
 
 Extract a new shared component once 3+ duplications exist, into `components/`, not `components/ui/`.

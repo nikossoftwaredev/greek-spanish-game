@@ -19,6 +19,12 @@ export const accuracyOf = ({
   return Math.round((right / (right + wrong)) * 100);
 };
 
+/** The percentage of right answers in one round, 100 when nothing was answered. */
+export const roundAccuracy = ({ correct, wrong }: { correct: number; wrong: number }): number => {
+  const answered = correct + wrong;
+  return answered === 0 ? 100 : Math.round((correct / answered) * 100);
+};
+
 export const accuracyTone = (accuracy: number): string => {
   if (accuracy >= 80) return "text-success";
   if (accuracy >= 50) return "text-sun-edge";

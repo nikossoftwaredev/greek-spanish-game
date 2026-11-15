@@ -1,5 +1,6 @@
 "use client";
 
+import { InstallDialog } from "@/components/app-shell/install-dialog";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { ClassNotesDialog } from "@/components/homework/class-notes-dialog";
 import { HomeworkDialog } from "@/components/homework/homework-dialog";
@@ -16,6 +17,7 @@ export const DialogProvider = () => {
       <ClassNotesDialog />
       <PdfViewerDialog />
       <AskLolaDialog />
+      <InstallDialog />
     </>
   );
 };

@@ -1,8 +1,9 @@
-import { BookOpen, Languages, Layers, PencilLine, Puzzle, Repeat2, Shuffle, Sparkles } from "lucide-react";
+import { BookOpen, Languages, Layers, PencilLine, Puzzle, Repeat2, Shuffle } from "lucide-react";
 import Link from "next/link";
 
 import { SourceLink } from "@/components/pdf/source-link";
 import { Button } from "@/components/ui/button";
+import { UnitActions } from "@/components/unit/unit-actions";
 import { onUnitColor, unitCounts } from "@/lib/content/selectors";
 import { aulaPdfPage } from "@/lib/pdf/books";
 import type { Unit } from "@/types/content";
@@ -65,12 +66,9 @@ export const UnitHero = ({ unit }: { unit: Unit }) => {
           <span>{counts.verbs} ρήματα</span>
         </div>
 
+        <UnitActions unitId={unit.id} />
+
         <div className="flex flex-wrap gap-2.5">
-          <Button asChild variant="chunky" size="xl">
-            <Link href={link("mix")}>
-              <Sparkles /> Παίξε αυτό το κεφάλαιο
-            </Link>
-          </Button>
           {games.map((game) => (
             <Button key={game.mode} asChild variant="chunky-outline" size="lg">
               <Link href={link(game.mode)}>
