@@ -21,6 +21,8 @@ Rules learned from actual corrections. These are binding.
 
 ## Known traps
 
+- **`Number(params.get("x"))` is `0` when `x` is missing**, because `Number(null)` is 0, and 0 is a valid chapter, page or index. The guided path read every game without a `ch` parameter as chapter 0, so after a round in chapter 3 the «Επόμενο» button sent the learner to chapter 0. Check `get()` for `null` first, then parse (`/^\d+$/`), and test a URL that leaves the parameter out as well as one that has it.
+
 - **A fixed bottom bar inside an animated wrapper floats mid-screen on a real phone.** A lesson footer was `position: fixed` inside an element whose `rise` animation (fill-mode `both`) left `transform` behind, so the footer sat in the middle of the screen on the learner's phone while it looked right in a desktop browser. Layout for full-screen screens is `PlayShell` (normal flow, `h-dvh`), keyframes end in `transform: none`, and a mobile fix is only verified at a real phone size with the footer's distance from the bottom measured (`0`), never by eye alone.
 - **React closures are one render behind a pointer stream.** `pointerup` can fire before the last `pointermove` has re-rendered, so a drag handler that reads state in `pointerup` stores a position one step short. Keep the latest value in a ref (as `LolaCompanion` does with `drag.current.last`).
 

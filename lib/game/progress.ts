@@ -68,10 +68,10 @@ export interface NextStep {
 
 const LAST_UNIT = 9;
 
-/** The chapter a session belongs to, when it is about exactly one: the "next" button of its end screen continues there. */
+/** The chapter a session belongs to, when it is about exactly one (a page of it counts): the "next" button of its end screen continues there. */
 export const chapterOf = (config: SessionConfig): number | undefined => {
   if (config.chapter !== undefined) return config.chapter;
-  const single = config.unitIds.length === 1 && !config.lesson && !config.lessons && !config.saved && !config.pages;
+  const single = config.unitIds.length === 1 && !config.lesson && !config.lessons && !config.saved;
   return single ? config.unitIds[0] : undefined;
 };
 

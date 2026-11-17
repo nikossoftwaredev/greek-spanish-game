@@ -41,8 +41,9 @@ export const PlayClient = ({ mode }: { mode: SessionMode }) => {
   const homeworkId = params.get("hw") ?? undefined;
   const saved = params.get("saved") === "1";
   const focus = params.get("focus") === "1";
-  const chapterParam = Number(params.get("ch"));
-  const chapter = Number.isInteger(chapterParam) && chapterParam >= 0 ? chapterParam : undefined;
+  // `Number(null)` is 0, so a missing `ch` must not be read as chapter 0
+  const chapterParam = params.get("ch");
+  const chapter = chapterParam !== null && /^\d+$/.test(chapterParam) ? Number(chapterParam) : undefined;
   const taught = params.get("taught") === "1";
   const pagesParam = params.get("pages");
   const lessonsParam = params.get("lessons");

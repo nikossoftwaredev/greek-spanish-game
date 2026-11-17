@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { InstallButton } from "@/components/app-shell/install-app";
 import { CONFIRM_DIALOG } from "@/components/confirm-dialog";
 import { PdfBookLoader } from "@/components/pdf/pdf-book-loader";
+import { VoicePicker } from "@/components/progress/voice-picker";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -336,6 +337,8 @@ export const ProgressDashboard = () => {
         <SettingSwitch id="sounds" icon={<Volume2 />} label="Ήχος όταν απαντάς σωστά" checked={sounds} onChange={setSounds} />
 
         <SettingSwitch id="lola-voice" icon={<AudioLines />} label="Η Λόλα μιλάει φωναχτά (αν το κινητό έχει ισπανική φωνή)" checked={lolaVoice} onChange={setLolaVoice} />
+
+        <VoicePicker />
 
         <InstallButton variant="chunky-outline" />
 
