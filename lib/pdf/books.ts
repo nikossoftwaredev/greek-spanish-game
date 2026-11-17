@@ -19,3 +19,8 @@ export const PDF_BOOK_IDS: PdfBook[] = ["aula", "gu"];
  * PDF page 23. (The Gramática de uso is always addressed by PDF page.)
  */
 export const aulaPdfPage = (printedPage: number): number => printedPage + 1;
+
+/** The last page printed in the Aula PDF. The «Más ejercicios» pages (141 and up) are a separate booklet, not in it. */
+const AULA_LAST_PRINTED_PAGE = 139;
+
+export const isInAulaPdf = (printedPage: number): boolean => printedPage <= AULA_LAST_PRINTED_PAGE;

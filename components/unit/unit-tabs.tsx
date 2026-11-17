@@ -48,7 +48,7 @@ export const UnitTabs = ({ unit, verbs, gramatica }: UnitTabsProps) => {
       </TabsList>
 
       <TabsContent value="vocab">
-        <VocabList groups={unit.vocab} unitId={unit.id} />
+        <VocabList groups={unit.vocab} unitId={unit.id} lexicoPage={unit.pages.lexico} />
       </TabsContent>
 
       <TabsContent value="grammar" className="space-y-3">

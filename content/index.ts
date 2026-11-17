@@ -1,7 +1,7 @@
-import { acceptedForms, normalize, stripAccents, stripLeadingArticle } from "@/lib/game/text";
-import type { Unit, VocabGroup } from "@/types/content";
+import type { Unit, UnitBase, VocabGroup } from "@/types/content";
 
 import { unit0 } from "./units/unit-0";
+import { unit0Pages } from "./units/unit-0-pages";
 import { unit1 } from "./units/unit-1";
 import { unit1Pages } from "./units/unit-1-pages";
 import { unit2 } from "./units/unit-2";
@@ -22,31 +22,9 @@ import { unit9 } from "./units/unit-9";
 import { unit9Pages } from "./units/unit-9-pages";
 import { verbs } from "./verbs";
 
-/** The same word spelled the same way (ignoring article, accents and "/a" endings) is one card. */
-const wordKey = (es: string): string => stripAccents(stripLeadingArticle(normalize(acceptedForms({ es })[0] ?? es)));
-
-/**
- * Adds the whole-book vocabulary (one group per printed page) to a unit. A word that already has a
- * card anywhere in the book (the Léxico pages, an earlier unit, an earlier page) is not added twice,
- * because two cards for one word would split a learner's progress.
- */
-const withPageVocab = ({ base, pages, seen }: { base: Unit; pages: VocabGroup[]; seen: Set<string> }): Unit => {
-  const extra = pages
-    .map((group) => ({
-      ...group,
-      items: group.items.filter((item) => {
-        const key = wordKey(item.es);
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      }),
-    }))
-    .filter((group) => group.items.length > 0);
-  return { ...base, vocab: [...base.vocab, ...extra] };
-};
-
-const BASE: [Unit, VocabGroup[]][] = [
-  [unit0, []],
+/** Each chapter with its glossary (one group per book page), in book order. */
+const BASE: [UnitBase, VocabGroup[]][] = [
+  [unit0, unit0Pages],
   [unit1, unit1Pages],
   [unit2, unit2Pages],
   [unit3, unit3Pages],
@@ -58,9 +36,7 @@ const BASE: [Unit, VocabGroup[]][] = [
   [unit9, unit9Pages],
 ];
 
-const seenWords = new Set(BASE.flatMap(([unit]) => unit.vocab.flatMap((group) => group.items.map((item) => wordKey(item.es)))));
-
-/** Every unit of "Aula Internacional Plus 1", in book order. */
-export const UNITS: Unit[] = BASE.map(([base, pages]) => withPageVocab({ base, pages, seen: seenWords }));
+/** Every unit of "Aula Internacional Plus 1", in book order. A word has one card in the whole book, so the glossary files list it once (`validate:content` checks it). */
+export const UNITS: Unit[] = BASE.map(([base, vocab]) => ({ ...base, vocab }));
 
 export const VERBS = verbs;

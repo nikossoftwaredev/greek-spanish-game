@@ -48,15 +48,29 @@ export const matchAnswer = ({ typed, accepted }: { typed: string; accepted: stri
   return "wrong";
 };
 
-/** Builds a masculine and a feminine form out of "cocinero/a" or "diseñador/a de moda". */
+/** Puts an ending after a word: "cocinero" + "a", "alemán" + "ana" (alemana), "inglés" + "esa" (inglesa), "mucho" + "os". */
+const withEnding = ({ base, ending }: { base: string; ending: string }): string => {
+  for (let overlap = Math.min(base.length, ending.length); overlap >= 2; overlap -= 1) {
+    if (stripAccents(base.slice(-overlap)) === ending.slice(0, overlap)) return `${base.slice(0, -overlap)}${ending}`;
+  }
+  if (ending === "a" && base.endsWith("e")) return `${base.slice(0, -1)}a`;
+  if (/[oa]s?$/.test(base)) return `${base.replace(/[oa]s?$/, "")}${ending}`;
+  return `${base}${ending}`;
+};
+
+/**
+ * Every written-out form of a word with slashes: endings ("cocinero/a", "mucho/a/os/as") or whole
+ * words ("mi/tu/su", "el/la"). Punctuation around the word ("¿cuánto/a?") stays around every form.
+ */
 const expandSlashToken = (token: string): string[] => {
-  const slash = token.indexOf("/");
-  if (slash === -1) return [token];
-  const base = token.slice(0, slash);
-  const suffix = token.slice(slash + 1);
-  const baseEndsWithVowel = /[oa]$/.test(base);
-  const feminine = baseEndsWithVowel ? `${base.slice(0, -1)}${suffix}` : `${base}${suffix}`;
-  return [base, feminine];
+  const lead = /^[¿¡"]*/.exec(token)?.[0] ?? "";
+  const trail = /[?!.,;:…"]*$/.exec(token)?.[0] ?? "";
+  const core = token.slice(lead.length, token.length - trail.length);
+  const [base, ...rest] = core.split("/").filter(Boolean);
+  if (!base || rest.length === 0) return [token];
+  const wholeWords = base.length <= 3 && rest.every((part) => part.length >= 2);
+  const forms = [base, ...rest.map((part) => (wholeWords ? part : withEnding({ base, ending: part })))];
+  return forms.map((form) => `${lead}${form}${trail}`);
 };
 
 /** Every Greek string that counts as correct for a meaning like "θερμός / ζεστός" or "παππούδες (παππούς και γιαγιά)". */
@@ -69,21 +83,28 @@ export const greekForms = (el: string): string[] => {
   return [...new Set(forms)];
 };
 
+/** The forms of one phrase, with every word that has slashes written out ("hijo/a único/a" is four forms). */
+const phraseForms = (phrase: string): string[] => {
+  let forms: string[][] = [[]];
+  for (const token of phrase.trim().split(/\s+/)) {
+    const options = token.includes("/") ? expandSlashToken(token) : [token];
+    forms = forms.flatMap((prefix) => options.map((option) => [...prefix, option]));
+  }
+  return forms.map((words) => words.join(" "));
+};
+
 /** Every Spanish string that counts as correct when the learner types `item`. */
 export const acceptedForms = (item: Pick<VocabItem, "es" | "accept">): string[] => {
   const variants = item.es
     .replace(/\(.*?\)/g, "")
+    .replace(/\s+/g, " ")
     .split(/\s+\/\s+/)
-    .flatMap((part) => {
-      const tokens = part.trim().split(/\s+/);
-      const slashIndex = tokens.findIndex((t) => t.includes("/"));
-      if (slashIndex === -1) return [part.trim()];
-      return expandSlashToken(tokens[slashIndex]).map((form) =>
-        tokens.map((t, i) => (i === slashIndex ? form : t)).join(" "),
-      );
-    });
+    .flatMap(phraseForms);
   return [...new Set([...variants, ...(item.accept ?? [])])];
 };
+
+/** The same word spelled the same way (ignoring article, accents and "/a" endings) is one card in the book. */
+export const vocabKey = (es: string): string => stripAccents(stripLeadingArticle(normalize(acceptedForms({ es })[0] ?? es)));
 
 export const shuffle = <T,>(input: readonly T[]): T[] => {
   const array = [...input];

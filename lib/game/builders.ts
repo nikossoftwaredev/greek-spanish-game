@@ -472,7 +472,6 @@ const savedToVocab = (word: SavedWord): FlatVocab => ({
   example: word.example,
   unitId: -1,
   groupId: "saved",
-  groupTitleEs: "Mis palabras",
   groupTitleEl: "Οι λέξεις μου",
 });
 

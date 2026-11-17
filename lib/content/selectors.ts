@@ -7,9 +7,7 @@ export interface FlatVocab extends VocabItem {
   unitId: number;
   /** Page of the book (printed number) where the word appears. */
   page?: number;
-  section?: string;
   groupId: string;
-  groupTitleEs: string;
   groupTitleEl: string;
 }
 
@@ -31,9 +29,7 @@ export const ALL_VOCAB: FlatVocab[] = UNITS.flatMap((unit) =>
       ...item,
       unitId: unit.id,
       page: group.page,
-      section: group.section,
       groupId: group.id,
-      groupTitleEs: group.titleEs,
       groupTitleEl: group.titleEl,
     })),
   ),

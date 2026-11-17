@@ -1,11 +1,14 @@
 import { type FlatVocab, getGuUnit, getUnit, lessonByKey, unitOfVerb } from "@/lib/content/selectors";
 import type { ExerciseSource } from "@/lib/game/types";
-import { aulaPdfPage } from "@/lib/pdf/books";
+import { aulaPdfPage, isInAulaPdf } from "@/lib/pdf/books";
 
-/** Where a word of the book is: its chapter and printed page. Saved words belong to no book. */
+/** The PDF page of a printed Aula page, or nothing when the page is not in the PDF (the «Más ejercicios» booklet). */
+const pdfPageOf = (page: number | undefined): number | undefined => (page === undefined || !isInAulaPdf(page) ? undefined : aulaPdfPage(page));
+
+/** Where a word of the book is: its chapter, printed page and exercise. Saved words belong to no book. */
 export const vocabSource = (item: FlatVocab): ExerciseSource | undefined => {
   if (item.unitId < 0) return undefined;
-  return { book: "aula", units: [item.unitId], page: item.page, pdfPage: item.page === undefined ? undefined : aulaPdfPage(item.page) };
+  return { book: "aula", units: [item.unitId], page: item.page, exercise: item.exercise, pdfPage: pdfPageOf(item.page) };
 };
 
 /**
@@ -22,7 +25,7 @@ export const lessonSource = ({ lessonKey, exercise }: { lessonKey: string; exerc
     return { book: "gu", units: [entry.unitId], exercise, pdfPage: unit && (hasExercise ? unit.page + 1 : unit.page) };
   }
   const page = getUnit(entry.unitId)?.pages.gramatica;
-  return { book: "aula", units: [entry.unitId], page, pdfPage: page === undefined ? undefined : aulaPdfPage(page) };
+  return { book: "aula", units: [entry.unitId], page, pdfPage: pdfPageOf(page) };
 };
 
 /** A verb belongs to the chapter that introduces it. */
@@ -35,7 +38,7 @@ export const matchSource = (items: FlatVocab[]): ExerciseSource | undefined => {
   const units = [...new Set(inBook.map((item) => item.unitId))].sort((a, b) => a - b);
   const pages = new Set(inBook.map((item) => item.page));
   const page = pages.size === 1 ? inBook[0].page : undefined;
-  return { book: "aula", units, page, pdfPage: page === undefined ? undefined : aulaPdfPage(page) };
+  return { book: "aula", units, page, pdfPage: pdfPageOf(page) };
 };
 
 const list = (numbers: number[]): string => numbers.join(", ");
@@ -50,6 +53,7 @@ export const describeSource = (source: ExerciseSource): string => {
   }
   const parts = ["Aula", `${many ? "Κεφάλαια" : "Κεφάλαιο"} ${list(source.units)}`];
   if (source.page !== undefined) parts.push(`σελ. ${source.page}`);
+  if (source.exercise !== undefined && !many) parts.push(`άσκηση ${source.exercise}`);
   return parts.join(" · ");
 };
 

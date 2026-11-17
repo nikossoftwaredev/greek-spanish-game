@@ -39,7 +39,7 @@ Goal: a static project (no database) to learn Spanish with games, split exactly 
 - [x] `PlayShell`: locked top and bottom bars for games, lessons and flashcards (fixes the footer floating mid-screen on a real phone), install banner/button for mobile browsers
 - [x] One floating, draggable `LolaCompanion` (position remembered, bubble flips to the side with room and stays on screen, stands on top of the game footer), her lines go through `lola-store`
 - [x] Right-answer sound (Web Audio) and Lola's voice (free browser voice, only with a Spanish voice), both with settings and in the backup
-- [ ] Learner: put the Klett Anexo pages in `data/anexo/` so the Aula vocabulary can be replaced
+- [x] Klett Anexo glossary replaces the Aula vocabulary (see the plan below)
 - [ ] Underlining the found text in the PDF: not possible for the scanned Aula PDF (images, no text layer); possible for the Gramática PDF (has a text layer) later
 - [ ] Learner: push to GitHub and import the repo in Vercel (no env vars needed)
 - [ ] `/audit` and `/site-qa` before sharing the URL widely (not run yet)
@@ -59,3 +59,24 @@ Goal: a static project (no database) to learn Spanish with games, split exactly 
 - Driven in the browser at 390 px and 1280 px: dragging Lola (lands where released, a drag does not open Ask Lola, a tap does), her position after navigation and reload (`lolaPosition` in `vamos:settings:v1`), the bubble flipping to the side with room in all four corners and staying inside the screen, her bubble above the game footer on wrong answers, lesson steps and the end screen, the right-answer sound (2 notes per right answer, 0 for wrong ones, 0 with the setting off), backup round trip with `wordResults` and `lessonProgress`, PDF zoom (all checks pass), install banner (Android, iPhone, desktop), the guided path end to end.
 - Bugs found by driving it: the default spot of Lola covered an answer option on game screens (now anchored above the footer), a drag stored a position one pointer step short (stale closure, now a ref), two test scripts targeted removed UI (four flashcard buttons, the old tappable Lola).
 - Known limits: the voice and the sound were verified through the code paths (headless Chrome has no Spanish voice and no speakers), so check them once on the real phone; the real-phone Safari behaviour of PDF zoom and the keyboard was not verified; `/audit` and `/site-qa` were not run; nothing is deployed yet.
+
+## Plan: the Klett glossary (data/Α1.pdf) as the only Aula vocabulary source (2026-11-17)
+
+The learner added the Greek Anexo of Aula Internacional Plus 1 (54 scanned pages, no text layer). Its «Γλωσσάριο» lists, per chapter, every word with its Greek meaning under a «Página N» header and an exercise number in the margin. Goal: the Aula vocabulary comes only from it, so opening chapter 3 shows each word with its book page.
+
+- [x] Transcribe the glossary tables (not the grammar notes or the extra «Αξιολόγιο» lists) per chapter: 9 agents read the rendered pages, one JSON per chapter in the scratchpad (page header as printed, exercise number carried forward, Spanish and Greek exactly as printed)
+- [x] Independent review: a second, independent reading of every page (the readers never saw the first one), compared row by row by a script; the 4 differing rows were judged on the page image
+- [x] Merge: new `content/units/unit-N-pages.ts` (one group per printed page, for chapters 0 to 9) built from the glossary; keep the id, part of speech, gender, note and original example of a word the old data already had (progress is stored by id), new ids for new words, drop old words the glossary does not list; remove the old Léxico groups from the unit files
+- [x] `VocabItem.exercise`, page ranges like «Páginas 18 y 19», the «Más ejercicios» pages (141+, not in the Aula PDF, so no «Βιβλίο» button for them)
+- [x] UI: the vocabulary list loses the «Βασικό λεξιλόγιο» view (there are no topic groups any more), rows and sources show «σελ. N · άσκηση M»
+- [x] `validate:content`, `smoke:game`, `tsc`, `eslint`, `build`, browser check at 390 px and desktop, docs and rules updated
+- Known trade-off: a word keeps one card for the whole book (first chapter that prints it), so progress is not split; a word the glossary repeats in a later chapter is not listed twice.
+
+### Review: the glossary as the Aula vocabulary (2026-11-17)
+
+- `data/Α1.pdf` (54 scanned pages, no text layer) was read visually by 9 readers, then again by 9 independent readers; 1,587 glossary rows in total, the two readings agree on all but 4 rows (judged on the page image: two accent readings of a Greek word, two spaces after a slash).
+- Result: 1,496 words (the old data had 1,953, of which 988 were already in the glossary and kept their id, part of speech, gender, note and example when the Greek meaning still agrees; 509 are new; 966 old words are not in the glossary and are gone, as asked). About 90 glossary rows repeat a word printed in an earlier chapter and stay in the first one (one card per word).
+- Print errors fixed in the generator, never silently: `grafico/a` (accent), `υπομονητικός` (spelling) and a few spaces after a slash; `compartir | συνήθεια` is a print error that disappears because `compartir` is already in chapter 0.
+- `acceptedForms` now writes out every slash in a phrase (`hijo/a único/a`, `mucho/a/os/as`, `mi/tu/su`, `alemán/ana` is `alemana`, `inglés/esa` is `inglesa`); 17 cases checked.
+- Checked: `tsc`, `eslint`, `validate:content` (1,496 words), `smoke:game` (14,892 exercises), `pnpm build`, the vocabulary tab at 390 px and desktop, a flashcard round with its «σελ. N · άσκηση M» source, backup round trip, guided path.
+- Not done on purpose: the Anexo's extra thematic boxes («ΑΞΙΟΛΟΓΙΟ», «ΛΕΞΙΛΟΓΙΟ»: colours, days, family, food, professions...) and its Greek grammar notes have no book page and are not part of the vocabulary; they could become a separate «Θεματικό λεξιλόγιο» section later.

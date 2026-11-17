@@ -6,7 +6,7 @@ Guidance for Claude Code when working in this repository. Detailed rules live in
 
 **Vamos**: a fully static study game for a Greek speaker learning Spanish with **two course books, treated as equals**: *Aula Internacional Plus 1* (A1, chapters 0 to 9: vocabulary by page, grammar lessons, verbs) and *Gramática de uso del español* (107 units, each with theory and numbered exercises; the class writes homework as "50.2", unit 50 exercise 2). Both books have their own pages, grammar lessons, drills, "taught in class" ticks and practice. There is **no database, no auth, no backend**. Progress, homework and settings live in the browser's `localStorage`. It is deployed to Vercel as a static site.
 
-The course PDFs live in `data/` (git-ignored, copyrighted, never deployed). The content in `content/` is typed data transcribed from them, with original Greek explanations and original drills.
+The course PDFs live in `data/` (git-ignored, copyrighted, never deployed): the two books and `Α1.pdf`, the Klett Greek Anexo whose glossary is the **only source of Aula vocabulary** (a scan without a text layer, read visually, two independent readings compared). The content in `content/` is typed data transcribed from them, with original Greek explanations and original drills.
 
 ## Commands
 

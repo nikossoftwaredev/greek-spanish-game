@@ -13,7 +13,7 @@ import { withArticle } from "@/lib/content/selectors";
 import { cn } from "@/lib/general/utils";
 import { lookupLocal, PERSON_EL, type VerbFormMatch, verbOf } from "@/lib/lookup/local-index";
 import { lookupRemote, type RemoteLookup } from "@/lib/lookup/remote";
-import { aulaPdfPage } from "@/lib/pdf/books";
+import { aulaPdfPage, isInAulaPdf } from "@/lib/pdf/books";
 import { useDialogStore } from "@/lib/stores/dialog-store";
 import { useProgressStore } from "@/lib/stores/progress-store";
 import type { ExampleSentence } from "@/types/content";
@@ -194,7 +194,7 @@ export const WordLookupDialog = () => {
                 <p>{item.el}</p>
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant="secondary">{item.groupTitleEl}</Badge>
-                  {item.page !== undefined && <SourceLink book="aula" page={aulaPdfPage(item.page)} label={`Σελίδα ${item.page} στο βιβλίο`} size="xs" />}
+                  {item.page !== undefined && isInAulaPdf(item.page) && <SourceLink book="aula" page={aulaPdfPage(item.page)} label={`Σελίδα ${item.page} στο βιβλίο`} size="xs" />}
                 </div>
                 {item.noteEl && <p className="pt-1 text-sm text-muted-foreground">{item.noteEl}</p>}
                 {item.example && (

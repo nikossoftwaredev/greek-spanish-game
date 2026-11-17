@@ -8,6 +8,7 @@
  * - NEVER use an em dash or a double hyphen as a dash. Use a comma, a colon or parentheses.
  * - Greek text uses polytonic-free modern Greek (monotonic), with the correct accents.
  * - Example sentences and drills are ORIGINAL (A1 level), never copied from the book.
+ * - The Aula vocabulary (Spanish and Greek, page and exercise) is the Klett glossary, transcribed as printed.
  */
 
 /** Part of speech, used by games to pick a sensible exercise type. */
@@ -33,7 +34,7 @@ export interface ExampleSentence {
 }
 
 export interface VocabItem {
-  /** Globally unique, kebab-case, prefixed with the unit: `u1-cocinero`. Never reused. */
+  /** Globally unique, kebab-case, prefixed with the unit that first had the word: `u1-cocinero`. Never reused, never renamed (progress is stored by it), even when the word moves to another chapter. */
   id: string;
   /**
    * Spanish exactly as the book prints it, but nouns WITHOUT their article (the article comes
@@ -49,6 +50,8 @@ export interface VocabItem {
   pos: PartOfSpeech;
   /** Nouns only. */
   gender?: Gender;
+  /** Number of the book exercise (activity) the word belongs to in the glossary, when it has one. */
+  exercise?: number;
   /** Short Greek note: false friend, usage, memory hook. Optional. */
   noteEl?: string;
   /** An ORIGINAL A1 sentence using the word, with its Greek translation. */
@@ -57,13 +60,13 @@ export interface VocabItem {
   accept?: string[];
 }
 
-/** A titled block of vocabulary, mirroring a heading on the book's "Léxico" page. */
+/** The words of one book page (or page pair) of the glossary, in the order the glossary lists them. */
 export interface VocabGroup {
-  /** Unique within the unit, kebab-case: `profesiones`. Page groups use `p<page>`: `p16`. */
+  /** Unique within the unit: `p<page>`, with the first page of a pair (`p18` for "Páginas 18 y 19"). */
   id: string;
   /** Page of the book (the number PRINTED on the page) where these words appear. */
-  page?: number;
-  /** Section of the unit the page belongs to: "Léxico", "Comprender", "Explorar y reflexionar"... */
+  page: number;
+  /** `Más ejercicios` for the pages of the extra exercise booklet (141 and up, not in the Aula PDF). */
   section?: string;
   titleEs: string;
   titleEl: string;
@@ -153,6 +156,8 @@ export interface BookPages {
   end: number;
   lexico?: number;
   gramatica?: number;
+  /** The «Más ejercicios» pages of this chapter, printed after the nine chapters. */
+  masEjercicios?: { start: number; end: number };
 }
 
 export interface Unit {
@@ -167,11 +172,15 @@ export interface Unit {
   pages: BookPages;
   /** "Recursos comunicativos" rewritten as short Greek bullet points (3 to 6). */
   communicativeEl: string[];
+  /** The glossary of the chapter, filled in from `content/units/unit-N-pages.ts`. */
   vocab: VocabGroup[];
   grammar: GrammarLesson[];
   /** Ids from `content/verbs.ts` that this unit practises. */
   verbIds: string[];
 }
+
+/** A unit as written in `content/units/unit-N.ts`: everything but the glossary, which comes from its own file. */
+export type UnitBase = Omit<Unit, "vocab">;
 
 /** 0 yo, 1 tú, 2 él/ella/usted, 3 nosotros/as, 4 vosotros/as, 5 ellos/ellas/ustedes. */
 export type PersonForms = [string, string, string, string, string, string];

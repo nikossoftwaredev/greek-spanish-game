@@ -2,6 +2,7 @@ import { UNITS, VERBS } from "../content";
 import { GU_UNITS } from "../content/gramatica";
 import { GU_PRACTICE } from "../content/gramatica/practice";
 import { PHRASEBOOK } from "../content/phrasebook";
+import { vocabKey } from "../lib/game/text";
 
 /**
  * Sanity checks for the course content: unique ids, drills that can be answered, verbs that exist,
@@ -12,6 +13,8 @@ const errors: string[] = [];
 const fail = (message: string) => errors.push(message);
 
 const seenVocab = new Set<string>();
+/** One card per word in the whole book: the same word (ignoring article, accents, "/a") may be listed only once. */
+const seenWordKeys = new Map<string, string>();
 const verbIds = new Set<string>();
 
 for (const verb of VERBS) {
@@ -30,16 +33,22 @@ for (const unit of UNITS) {
   for (const group of unit.vocab) {
     if (groupIds.has(group.id)) fail(`Unit ${unit.id}: duplicate group id ${group.id}`);
     groupIds.add(group.id);
-    if (group.page !== undefined) {
-      if (group.page < unit.pages.start || group.page > unit.pages.end) fail(`Unit ${unit.id}: group ${group.id} has page ${group.page} outside ${unit.pages.start}-${unit.pages.end}`);
-      if (/^p\d+$/.test(group.id) && group.id !== `p${group.page}`) fail(`Unit ${unit.id}: group ${group.id} does not match its page ${group.page}`);
-    }
-    if (/^p\d+$/.test(group.id) && group.page === undefined) fail(`Unit ${unit.id}: page group ${group.id} has no page`);
+    const more = unit.pages.masEjercicios;
+    const inChapter = group.page >= unit.pages.start && group.page <= unit.pages.end;
+    const inMore = more !== undefined && group.page >= more.start && group.page <= more.end;
+    if (!inChapter && !inMore) fail(`Unit ${unit.id}: group ${group.id} has page ${group.page} outside the chapter (${unit.pages.start}-${unit.pages.end}) and its «Más ejercicios» pages`);
+    if (group.id !== `p${group.page}`) fail(`Unit ${unit.id}: group ${group.id} does not match its page ${group.page}`);
+    if (inMore && group.section !== "Más ejercicios") fail(`Unit ${unit.id}: group ${group.id} is a «Más ejercicios» page and must say so in \`section\``);
     for (const item of group.items) {
       if (seenVocab.has(item.id)) fail(`Duplicate vocabulary id: ${item.id}`);
       seenVocab.add(item.id);
-      if (!item.id.startsWith(`u${unit.id}-`)) fail(`Vocabulary id ${item.id} should start with u${unit.id}-`);
+      if (!/^u\d-/.test(item.id)) fail(`Vocabulary id ${item.id} should start with the unit it was first added to: u<unit>-`);
       if (!item.es.trim() || !item.el.trim()) fail(`Vocabulary ${item.id} has empty text`);
+      if (/\s[mf]$/.test(item.es)) fail(`Vocabulary ${item.id}: "${item.es}" ends with a gender letter, which belongs in \`gender\``);
+      const key = vocabKey(item.es);
+      const first = seenWordKeys.get(key);
+      if (first) fail(`Vocabulary ${item.id}: "${item.es}" is the same word as ${first} (one card per word)`);
+      else seenWordKeys.set(key, item.id);
     }
   }
 

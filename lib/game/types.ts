@@ -11,7 +11,7 @@ export interface ExerciseSource {
   units: number[];
   /** Printed Aula page, when the words all come from one page. */
   page?: number;
-  /** The numbered exercise of the Gramática de uso (the 2 of "50.2"). */
+  /** The numbered exercise: the 2 of "50.2" in the Gramática de uso, or the activity of an Aula page (when the words all come from one). */
   exercise?: number;
   /** PDF page that "open the book" goes to. */
   pdfPage?: number;
